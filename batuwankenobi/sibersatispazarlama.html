@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FollowUp Satış Planı</title>
+<style>
+  :root{
+    --bg:#ffffff; --surface:#f7f7f9; --line:#e3e4e9; --fg:#16171b; --muted:#65676f;
+    --accent:#2563eb; --accent-soft:#eaf0ff; --ok:#059669; --warn:#b45309; --bad:#dc2626;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b0b0d; --surface:#141417; --line:#2a2b31; --fg:#f2f2f4; --muted:#9a9ca4;
+      --accent:#6b9bff; --accent-soft:#16233f; --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b0b0d; --surface:#141417; --line:#2a2b31; --fg:#f2f2f4; --muted:#9a9ca4;
+    --accent:#6b9bff; --accent-soft:#16233f; --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--fg);
+    font:16px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px; margin:0 auto; padding:40px 16px 80px}
+  header.top{border-bottom:1px solid var(--line); padding-bottom:24px; margin-bottom:32px}
+  h1{font-size:30px; line-height:1.2; margin:0 0 8px; letter-spacing:-.02em}
+  .sub{color:var(--muted); margin:0}
+  h2{font-size:22px; margin:44px 0 6px; letter-spacing:-.01em; scroll-margin-top:16px}
+  h2 .n{color:var(--accent); font-variant-numeric:tabular-nums; margin-right:8px}
+  h3{font-size:17px; margin:26px 0 6px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0; padding-left:22px}
+  li{margin:6px 0}
+  code{font-family:ui-monospace,Consolas,monospace; font-size:.9em; background:var(--surface); padding:2px 5px; border-radius:4px}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin:16px 0}
+  .card.accent{background:var(--accent-soft); border-color:transparent}
+  .tag{display:inline-block; font-size:12px; font-weight:600; padding:2px 8px; border-radius:99px; background:var(--accent-soft); color:var(--accent)}
+  .ok{color:var(--ok); font-weight:600}
+  .warn{color:var(--warn); font-weight:600}
+  .bad{color:var(--bad); font-weight:600}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:15px}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{color:var(--muted); font-weight:600; font-size:13px; text-transform:uppercase; letter-spacing:.04em}
+  .copybox{position:relative; margin:14px 0}
+  .copybox pre{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px;
+    padding:16px 16px 16px; margin:0; white-space:pre-wrap; word-wrap:break-word;
+    font:14px/1.6 ui-monospace,Consolas,monospace;
+  }
+  .copybox button{
+    position:absolute; top:8px; right:8px; border:1px solid var(--line); background:var(--bg);
+    color:var(--muted); border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer;
+  }
+  .copybox button:hover{color:var(--fg)}
+  .checklist{list-style:none; padding:0}
+  .checklist li{padding-left:30px; position:relative}
+  .checklist li::before{
+    content:""; position:absolute; left:0; top:6px; width:16px; height:16px;
+    border:2px solid var(--line); border-radius:4px;
+  }
+  .toc{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 18px}
+  .toc ol{margin:6px 0 0; padding-left:20px}
+  .toc a{color:var(--fg); text-decoration:none}
+  .toc a:hover{color:var(--accent); text-decoration:underline}
+  .big{font-size:19px; font-weight:600; line-height:1.45}
+  hr{border:0; border-top:1px solid var(--line); margin:36px 0}
+  footer{margin-top:50px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:14px}
+  @media print{ .copybox button{display:none} body{background:#fff; color:#000} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <span class="tag">FollowUp · Satış Planı</span>
+  <h1>Malı nasıl satarız — adım adım</h1>
+  <p class="sub">19 dolar, tek seferlik, ömür boyu lisans. Abartı yok, yapılacak iş listesi var.</p>
+</header>
+
+<div class="toc">
+  <strong>İçindekiler</strong>
+  <ol>
+    <li><a href="#s1">Önce şunu netleştirelim: ne satıyorsun</a></li>
+    <li><a href="#s2">Fiyat ve lisans — tam olarak ne yazacaksın</a></li>
+    <li><a href="#s3">Satışa başlamadan önceki 3 iş</a></li>
+    <li><a href="#s4">Nerede satacaksın (sıralı liste)</a></li>
+    <li><a href="#s5">Hazır metinler — kopyala yapıştır</a></li>
+    <li><a href="#s6">Sıcak satış: kime, nasıl, ne diyerek</a></li>
+    <li><a href="#s7">İlk 30 gün — gün gün plan</a></li>
+    <li><a href="#s8">Gerçekçi beklenti</a></li>
+    <li><a href="#s9">Sonraki 500 proje için tekrarlanabilir çeklist</a></li>
+  </ol>
+</div>
+
+<h2 id="s1"><span class="n">1</span>Önce şunu netleştirelim: ne satıyorsun</h2>
+
+<p>Sen "CRM" satmıyorsun. CRM deyince adam Google'a yazar, karşısına bedava Twenty çıkar, 45 bin yıldızlı, senden çok özellikli. O yarışa girme.</p>
+
+<p class="big">Sen şunu satıyorsun: <em>"Teklif gönderdin, cevap gelmedi, sen de unuttun, o iş uçtu."</em></p>
+
+<p>Bu cümleyi duyan herkesin başına gelmiştir. Acı somut. Ürün de tam bunu çözüyor: teklifi giriyorsun, takip tarihlerini kendisi kuruyor, her sabah "bugün şunu ara" diyor.</p>
+
+<div class="card accent">
+  <strong>Tek cümlelik tanıtımın (ezberle, her yerde bunu kullan):</strong>
+  <p style="margin-bottom:0">“FollowUp, gönderdiğin tekliflerin takibini otomatik kurar ve unutmanı engeller. Bilgisayarında çalışır, internet istemez, üyelik istemez, abonelik yok.”</p>
+</div>
+
+<h3>Üç satış argümanın, önem sırasına göre</h3>
+<ol>
+  <li><strong>Unutmayı bitirir.</strong> Asıl sattığın şey bu. Para kazandırır.</li>
+  <li><strong>Abonelik yok.</strong> 19 dolar ver, ömür boyu senin. Rakipler ayda 7–25 dolar.</li>
+  <li><strong>Veri bilgisayarından çıkmaz.</strong> Buluta gitmiyor, hesap açmıyorsun, internet bile gerekmiyor.</li>
+</ol>
+
+<h2 id="s2"><span class="n">2</span>Fiyat ve lisans — tam olarak ne yazacaksın</h2>
+
+<p><strong>19 dolar, tek seferlik.</strong> Tamam, buna razıyım — ama bir şartla: <span class="bad">"ömür boyu destek" yazma.</span> Sen zaten öyle demeyeceğini söyledin, çok doğru. Sebebini netleştireyim:</p>
+
+<p>19 dolardan eline geçen ~<strong>15,7 dolar</strong> (Gumroad %10 + 0,50 $, üstüne kart komisyonu). Adam sana bir tane "kurulmuyor" maili atsa, o satışın kârı gitti. 100 müşteride ayda 5 mail = ürün sana bedava çalışıyor demektir.</p>
+
+<p><strong>Ömür boyu LİSANS ver, ömür boyu DESTEK verme.</strong> Aradaki fark: lisans = "mal senin, sonsuza kadar kullan". Destek = "ben sana sonsuza kadar hizmet vereceğim". Birincisi sana hiçbir şeye mal olmuyor, ikincisi seni bitirir.</p>
+
+<h3>Satış sayfasına aynen bunu yaz</h3>
+
+<div class="copybox">
+<button onclick="cp(this)">kopyala</button>
+<pre>$19 — one-time payment. No subscription, ever.
+
+WHAT YOU GET
+- Lifetime license. Buy once, use it forever, on your own computer.
+- Free updates within version 1.x
+- Works fully offline. No account, no cloud, no API keys.
+- Your data never leaves your PC.
+- 30-day money-back guarantee. No questions asked.
+
+SUPPORT
+Email support, answered within a few business days.
+This is a one-person product at a one-time price - I keep it
+honest instead of promising a 24/7 helpdesk I cannot staff.</pre>
+</div>
+
+<p>Türkçe satacaksan:</p>
+
+<div class="copybox">
+<button onclick="cp(this)">kopyala</button>
+<pre>19 $ — tek seferlik ödeme. Abonelik yok.
+
+NE ALIYORSUN
+- Ömür boyu lisans. Bir kere al, kendi bilgisayarında sonsuza kadar kullan.
+- 1.x sürümleri boyunca ücretsiz güncelleme
+- Tamamen internetsiz çalışır. Üyelik yok, bulut yok.
+- Verilerin bilgisayarından asla çıkmaz.
+- 30 gün koşulsuz iade.
+
+DESTEK
+E-posta ile, birkaç iş günü içinde cevap.
+Tek kişilik bir üründe tek seferlik fiyat veriyorum; tutamayacağım
+bir 7/24 destek sözü vermektense dürüst olanı yapıyorum.</pre>
+</div>
+
+<div class="card">
+  <strong>Not:</strong> "30 gün koşulsuz iade"yi mutlaka koy. Zaten üründe lisans sunucusu yok, isteyen kopyalar — madem engelleyemiyorsun, bunu <em>güven</em>e çevir. İade oranı bu tip üründe genelde %2–5'tir, korkulacak bir şey değil.
+</div>
+
+<h2 id="s3"><span class="n">3</span>Satışa başlamadan önceki 3 iş</h2>
+
+<p>Bunlar 2–3 günlük iş. Bunları yapmadan link paylaşırsan para kaybedersin.</p>
+
+<h3 class="warn">İş 1 — SmartScreen uyarısı (en önemlisi)</h3>
+<p>Installer imzasız. Adam <code>FollowUp-Setup.exe</code>'yi indirince Windows <strong>"Bilinmeyen yayımcı — bilgisayarınıza zarar verebilir"</strong> diyecek. Para ödemiş adama bunu göstermek satışı öldürür.</p>
+<p>İki çözümün var:</p>
+<ul>
+  <li><strong>Bedava yol (şimdi bunu yap):</strong> İndirme sayfasına <em>"Kurulum nasıl yapılır"</em> diye 3 adımlık bir açıklama + ekran görüntüsü koy: "Windows uyarı verirse → <strong>Daha fazla bilgi</strong> → <strong>Yine de çalıştır</strong>. Bu uyarı, uygulamanın yeni olmasından kaynaklanır, virüs değildir." Bunu satın alma sayfasında <u>önceden</u> söyle ki adam şaşırmasın.</li>
+  <li><strong>Parayla yol (satış gelirse):</strong> Kod imzalama sertifikası, yıllık ~200–400 $. İlk 30 satıştan sonra al.</li>
+</ul>
+
+<h3>İş 2 — 30 saniyelik video</h3>
+<p>Metinden 10 kat fazla satar. Şunu çek (telefonla bile olur):</p>
+<ol>
+  <li>Uygulamayı aç, bir müşteri ekle, planı <code>3 → 7 → 14 gün</code> seç → tarihlerin kendiliğinden oluştuğunu göster</li>
+  <li>Dashboard'u göster: Overdue / Today / Upcoming</li>
+  <li><strong>İnternet kablosunu çek</strong> (veya Wi-Fi'ı kapat) → uygulama çalışmaya devam etsin</li>
+  <li>"Follow up" → mesajın hazır geldiğini göster → WhatsApp butonuna bas</li>
+</ol>
+<p>3. madde senin en güçlü kartın. Kimse bunu yapamıyor.</p>
+
+<h3>İş 3 — Satış sayfası</h3>
+<p>Gumroad'ın kendi sayfası yeter, ayrı site kurmana gerek yok. Sıralama şöyle olsun:</p>
+<ol>
+  <li>Başlık + tek cümle</li>
+  <li>Video</li>
+  <li>"Bu senin derdin mi?" (3 madde problem)</li>
+  <li>Ekran görüntüleri (dashboard, müşteri detay, mesaj penceresi)</li>
+  <li>Ne alıyorsun (yukarıdaki lisans metni)</li>
+  <li>Kurulum nasıl yapılır + SmartScreen notu</li>
+  <li>SSS</li>
+</ol>
+
+<h2 id="s4"><span class="n">4</span>Nerede satacaksın (sıralı liste)</h2>
+
+<table>
+  <tr><th>Sıra</th><th>Yer</th><th>Neden</th><th>Maliyet</th></tr>
+  <tr><td>1</td><td><strong>Gumroad</strong> veya <strong>Lemon Squeezy</strong></td><td>Ana satış noktan. Lemon Squeezy vergi/KDV işini üstlenir, Türkiye'den yurt dışına satışta rahat.</td><td>%10 + 0,50 $</td></tr>
+  <tr><td>2</td><td><strong>Microsoft Store</strong></td><td>2026'da kayıt ücreti kalktı, Electron kabul ediyor. <span class="ok">SmartScreen sorununu da çözer.</span> En yüksek getirili tek hamlen.</td><td>Bedava</td></tr>
+  <tr><td>3</td><td><strong>Reddit</strong></td><td>r/selfhosted, r/freelance, r/privacy, r/SideProject, r/smallbusiness</td><td>Bedava</td></tr>
+  <tr><td>4</td><td><strong>Product Hunt</strong></td><td>Tek günlük patlama + kalıcı backlink</td><td>Bedava</td></tr>
+  <tr><td>5</td><td><strong>Dizinler</strong></td><td>AlternativeTo, SaaSHub, GitHub "awesome-selfhosted" listesi</td><td>Bedava</td></tr>
+  <tr><td>6</td><td><strong>LinkedIn (Türkiye)</strong></td><td>Mali müşavir, ajans, emlak grupları</td><td>Bedava</td></tr>
+  <tr><td>7</td><td><strong>Sıcak satış</strong></td><td>Tanıdıkların. <span class="ok">İlk 10 satışın buradan gelecek.</span></td><td>Bedava</td></tr>
+</table>
+
+<div class="card">
+  <strong class="bad">Zaman harcama:</strong> AppSumo. Onlar web uygulaması istiyor, hesap/kod mantığıyla çalışıyorlar, senin ürün masaüstü ve hesapsız. Ayrıca tipik deal'leri 49–69 $, sen 19 $'sın. Başvurusu 10 dakika sürer, ama buna bel bağlama.
+</div>
+
+<h2 id="s5"><span class="n">5</span>Hazır metinler — kopyala yapıştır</h2>
+
+<h3>Gumroad başlığı ve açıklaması (İngilizce)</h3>
+<div class="copybox">
+<button onclick="cp(this)">kopyala</button>
+<pre>FollowUp - Never forget to follow up on a proposal
+
+You sent the quote. They said "let me check internally."
+Three weeks later, nobody remembers it existed.
+That deal did not die. You just forgot to chase it.
+
+FollowUp is a tiny Windows app that fixes exactly that.
+
+- Add a client and pick a follow-up plan (3-7-14 days, 2-5-10 days, or your own)
+- It creates every follow-up date for you
+- Your dashboard splits them into Overdue / Today / Upcoming
+- One click writes the follow-up email or WhatsApp message for you
+- Mark it done, or snooze it
+
+WHY IT IS DIFFERENT
+- Works with the internet unplugged. Really - try it.
+- No account. No cloud. No API keys. Nothing to sign up for.
+- Your client data stays in one file on your PC.
+- $19 once. Not per month.
+
+$19 one-time. Lifetime license. 30-day money-back guarantee.</pre>
+</div>
+
+<h3>Reddit postu (r/selfhosted, r/SideProject)</h3>
+<p><strong class="warn">Dikkat:</strong> Reddit'te reklam gibi yazarsan silinirsin. "Ben şunu yaptım, bakar mısınız" diye yaz. Linki en sona koy.</p>
+<div class="copybox">
+<button onclick="cp(this)">kopyala</button>
+<pre>I built a follow-up tracker that runs fully offline, because I kept
+losing deals to my own forgetfulness
+
+I do freelance work and I kept sending proposals and then just...
+forgetting about them. Not losing on price - losing because nobody
+followed up.
+
+Every CRM I tried wanted a monthly subscription and wanted my client
+list on their servers. I did not want either, so I built my own.
+
+It is a small Windows app:
+- You add a proposal and pick a follow-up plan (3-7-14 days etc.)
+- It schedules all the follow-up dates automatically
+- Dashboard shows Overdue / Today / Upcoming
+- It drafts the email or WhatsApp message from a template you control
+- SQLite file on your own disk, no server, no account, no telemetry
+
+You can literally unplug the network cable and it keeps working.
+Nothing is sent anywhere, and there is no license server, so it cannot
+stop working on you.
+
+Happy to answer anything about how it is built (Next.js + Prisma +
+SQLite wrapped in Electron). Feedback welcome, especially on what is
+missing.</pre>
+</div>
+
+<h3>Product Hunt tagline</h3>
+<div class="copybox">
+<button onclick="cp(this)">kopyala</button>
+<pre>FollowUp - The proposal follow-up tracker that works offline
+Never forget to follow up. No subscription, no cloud, no account.
+Your client data stays on your PC. $19 once.</pre>
+</div>
+
+<h3>LinkedIn postu (Türkçe)</h3>
+<div class="copybox">
+<button onclick="cp(this)">kopyala</button>
+<pre>Kaybedilen işlerin çoğu fiyattan kaybedilmiyor. Unutulduğu için kaybediliyor.
+
+Teklifi gönderiyorsun. "Değerlendirip döneceğiz" diyorlar.
+Üç hafta sonra o teklif kimsenin aklında değil.
+
+Bunun için küçük bir Windows programı yaptım: FollowUp.
+
+- Teklifi giriyorsun, takip tarihlerini kendisi kuruyor
+  (örn. 3. gün, 7. gün, 14. gün)
+- Her sabah "bugün kimi araman lazım" diye gösteriyor
+- Takip mesajını müşterinin bilgileriyle hazır yazıyor,
+  tek tıkla e-postaya veya WhatsApp'a atıyor
+
+Bir farkı var: tamamen kendi bilgisayarınızda çalışıyor.
+Bulut yok, üyelik yok, internet bile gerekmiyor.
+Müşteri verileriniz bilgisayarınızdan çıkmıyor.
+
+Abonelik de yok. Bir kere alıyorsunuz, ömür boyu sizin.
+
+Deneyip fikrini söyleyecek birkaç kişi arıyorum. Yorumlara yazın,
+linki göndereyim.</pre>
+</div>
+
+<h2 id="s6"><span class="n">6</span>Sıcak satış: kime, nasıl, ne diyerek</h2>
+
+<p>İlk 10 satışın internetten gelmez, tanıdıklardan gelir. Bu yüzden burası en önemli bölüm.</p>
+
+<h3>Kime satacaksın</h3>
+<p>Teklif gönderip cevap bekleyen herkes. Sırayla en kolayı:</p>
+<ul>
+  <li><strong>Ajanslar / web tasarımcıları / matbaacılar</strong> — sürekli teklif gönderirler</li>
+  <li><strong>Mimar, iç mimar, müteahhit</strong> — teklif tutarı büyük, unutmak pahalı</li>
+  <li><strong>Emlakçı, sigortacı</strong> — takip işin tamamı</li>
+  <li><strong>Mali müşavir</strong> — <span class="ok">bunlar altın</span>. Müvekkil verisi buluta çıkamaz. Senin "veri bilgisayardan çıkmaz" argümanın burada tercih değil, zorunluluk.</li>
+  <li><strong>Makine/sanayi tedarikçileri</strong> — senin zaten içinde olduğun sektör, teklif hayatın merkezi</li>
+</ul>
+
+<h3>Nasıl konuşacaksın</h3>
+<p>Satış yapma, <strong>soru sor</strong>. Adam kendi derdini söylesin, sen çözümü göster.</p>
+
+<div class="copybox">
+<button onclick="cp(this)">kopyala</button>
+<pre>SEN: Abi bir şey soracağım, ayda kaç teklif gönderiyorsunuz aşağı yukarı?
+
+O: Ya işte 10-15 falan.
+
+SEN: Peki cevap gelmeyenleri nasıl takip ediyorsunuz?
+
+O: (Burada ya "Excel'de tutuyoruz" der, ya "aklımda" der,
+    ya da güler "takip edemiyoruz" der. Üçü de senin lehine.)
+
+SEN: Ben tam onun için küçük bir program yaptım. Teklifi giriyorsun,
+     3. gün 7. gün 14. gün diye takip tarihlerini kendi kuruyor.
+     Sabah açtığında "bugün şu üç kişiyi ara" diyor. Mesajı da
+     hazır yazıyor, WhatsApp'a tek tıkla atıyorsun.
+
+     İnternet bile gerekmiyor, veriler senin bilgisayarında kalıyor,
+     kimsenin sunucusuna gitmiyor. Aidat da yok, bir kere alıyorsun.
+
+     İstersen 2 dakika göstereyim, işine yaramazsa kapatırsın.
+
+(GÖSTER. Konuşma, ekranı göster. 2 dakika.)
+
+SEN: 19 dolar, tek seferlik. Beğenmezsen 30 gün içinde söyle,
+     parayı geri veriyorum.</pre>
+</div>
+
+<div class="card">
+  <strong>Üç kural:</strong>
+  <ol style="margin-bottom:0">
+    <li><strong>Göster, anlatma.</strong> Laptopu aç, 2 dakikada canlı göster. Anlatınca kimse anlamıyor, görünce herkes anlıyor.</li>
+    <li><strong>Fiyatı en sona bırak.</strong> Önce değer, sonra rakam. 19 dolar duyunca zaten itiraz etmeyecek.</li>
+    <li><strong>İlk 5 kişiye bedava ver.</strong> Para isteme. Karşılığında iki şey iste: <em>kullansınlar</em> ve <em>2 cümle yorum yazsınlar</em>. O yorumlar senin satış sayfandaki en değerli şey olacak.</li>
+  </ol>
+</div>
+
+<h2 id="s7"><span class="n">7</span>İlk 30 gün — gün gün plan</h2>
+
+<h3>1. hafta — hazırlık</h3>
+<ul class="checklist">
+  <li>Gumroad (veya Lemon Squeezy) hesabı aç, ödeme bilgilerini gir</li>
+  <li>30 saniyelik videoyu çek (mutlaka internet kablosunu çekme sahnesi olsun)</li>
+  <li>4–5 ekran görüntüsü al</li>
+  <li>Satış sayfasını yaz (yukarıdaki metni kullan)</li>
+  <li>"Kurulum nasıl yapılır" + SmartScreen açıklaması sayfasını yaz</li>
+  <li>Ürünü <strong>19 $</strong> olarak yayına al</li>
+</ul>
+
+<h3>2. hafta — sıcak satış (ekrandan uzak dur, insanlarla konuş)</h3>
+<ul class="checklist">
+  <li>Tanıdıklarından 20 kişilik liste çıkar (ajans, mimar, mali müşavir, tedarikçi)</li>
+  <li>5 kişiye bedava ver, yorum iste</li>
+  <li>15 kişiye yukarıdaki konuşmayla göster ve sat</li>
+  <li>Gelen ilk yorumları satış sayfasına ekle</li>
+  <li>Herkesin sorduğu soruları not et → SSS'e ekle</li>
+</ul>
+
+<h3>3. hafta — internet</h3>
+<ul class="checklist">
+  <li>Microsoft Store'a başvur (bedava, biraz uğraştırır ama SmartScreen'i çözer)</li>
+  <li>r/selfhosted'a yukarıdaki postu at (salı veya çarşamba, 15:00–18:00 TSİ iyi çalışıyor)</li>
+  <li>Gelen her yoruma cevap ver — asıl satış yorumlarda oluyor</li>
+  <li>Bir hafta sonra r/freelance ve r/SideProject'e farklı metinle at</li>
+  <li>AlternativeTo ve SaaSHub'a ürünü ekle</li>
+</ul>
+
+<h3>4. hafta — büyütme</h3>
+<ul class="checklist">
+  <li>Product Hunt lansmanı (salı/çarşamba 09:00 TSİ'den önce)</li>
+  <li>LinkedIn postunu at (Türkçe)</li>
+  <li>Indie Hackers'a "ilk ayda ne oldu" diye dürüst bir yazı yaz — bu tip yazılar çok okunuyor</li>
+  <li>Satış geldiyse: kod imzalama sertifikası al</li>
+  <li>Satan müşterilerle konuş: <strong>"bunu neden aldın?"</strong> Cevap, bir sonraki ayın tüm pazarlamasını yazacak.</li>
+</ul>
+
+<h2 id="s8"><span class="n">8</span>Gerçekçi beklenti</h2>
+
+<p>Yalan söylemeyeyim: ilk ay <strong>5–20 satış</strong> normaldir. Bu başarısızlık değil, normal başlangıç. Tek kişilik geliştiricilerde medyan aylık gelir 1.000 doların altında; iyi giden işler bile 12–18 ayda oturuyor.</p>
+
+<table>
+  <tr><th>Senaryo</th><th>Aylık satış</th><th>Eline geçen</th></tr>
+  <tr><td>Kötü</td><td>5</td><td>~78 $</td></tr>
+  <tr><td>Normal</td><td>20</td><td>~314 $</td></tr>
+  <tr><td>İyi</td><td>60</td><td>~942 $</td></tr>
+</table>
+
+<div class="card accent">
+  <strong>Ama asıl kazancın bu değil.</strong> Sen 500 proje yapacağını söyledin. Bu ilk ürün sana şunları öğretecek: satış sayfası nasıl yazılır, Reddit'te nasıl paylaşılır, insan neye para veriyor, hangi laf tutuyor. <strong>Bu bilgi ikinci üründe 10 kat daha hızlı para kazandırır.</strong> Bu yüzden bu ürünü çöpe atmamak doğru karar.
+</div>
+
+<h2 id="s9"><span class="n">9</span>Sonraki 500 proje için tekrarlanabilir çeklist</h2>
+
+<p>Her yeni üründe aynı sırayı uygula, düşünme:</p>
+
+<ol>
+  <li><strong>Tek cümle:</strong> "X yapan kişi, Y derdinden kurtulur." Bu cümleyi kuramıyorsan ürünü yapma.</li>
+  <li><strong>5 kişiye sor</strong> — yapmadan önce. "Böyle bir şey olsa alır mıydın?" değil, "bu derdi şu an nasıl çözüyorsun?" diye sor.</li>
+  <li><strong>En küçük çalışan halini yap.</strong> 2 hafta. Uzarsa yanlış yoldasın.</li>
+  <li><strong>30 saniyelik video</strong> — üründen önce bunu çekebiliyor olmalısın.</li>
+  <li><strong>Gumroad'a koy, fiyat ver.</strong> Bedava dağıtma, fiyat koy. Bedava kimse kullanmıyor.</li>
+  <li><strong>10 kişiye elden sat.</strong> İnternete çıkmadan önce.</li>
+  <li><strong>Sonra Reddit + Product Hunt.</strong></li>
+  <li><strong>İlk 20 müşteriyle konuş.</strong> Neden aldılar? O cevap, bir sonraki ürünün konusu olur.</li>
+</ol>
+
+<hr>
+
+<div class="card">
+  <strong>Bugün yapacağın tek şey:</strong> Gumroad hesabı aç ve ürünü 19 $ olarak yayına al. Sayfa mükemmel olmasın, olsun. Yayında olmayan ürün satılmaz. Geri kalanını yarın hallederiz.
+</div>
+
+<footer>
+  FollowUp satış planı · Kaynaklar: Gumroad ücret yapısı (%10 + 0,50 $), Microsoft Store 2026 ücretsiz kayıt duyurusu,
+  AppSumo partner şartları, freelancer CRM fiyat karşılaştırmaları (Bonsai / Bloom / Indy / Moxie), indie geliştirici gelir verileri.
+  <br><br>
+  Bu bir pazarlama planıdır, gelir garantisi değildir. Rakamlar sektör ortalamalarıdır.
+</footer>
+
+</div>
+
+<script>
+function cp(btn){
+  var text = btn.parentElement.querySelector('pre').innerText;
+  var done = function(){ btn.textContent = 'kopyalandı'; setTimeout(function(){ btn.textContent='kopyala'; }, 1500); };
+  var fail = function(){ btn.textContent = 'seçip kopyala'; setTimeout(function(){ btn.textContent='kopyala'; }, 2000); };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(done, function(){ legacy(text, done, fail); });
+  } else {
+    legacy(text, done, fail);
+  }
+}
+function legacy(text, done, fail){
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.top='-1000px';
+    document.body.appendChild(ta); ta.select();
+    var ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    ok ? done() : fail();
+  }catch(e){ fail(); }
+}
+</script>
+</body>
+</html>

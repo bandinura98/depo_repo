@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tekne — Süper Kahraman Menajerlik Oyunu | Tasarım Dökümanı</title>
+<style>
+  :root{
+    --bg:#0f1115;
+    --panel:#161922;
+    --panel-2:#1c2029;
+    --border:#2a2f3a;
+    --text:#e7e9ee;
+    --muted:#9aa3b2;
+    --accent:#ff5d5d;
+    --accent-2:#4da3ff;
+    --accent-3:#ffcf5c;
+    --good:#4caf7d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.6;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:48px 24px 96px;
+  }
+  header.hero{
+    padding:40px 32px;
+    border-radius:16px;
+    background:linear-gradient(135deg,#1c2029 0%,#20141c 60%,#1a1620 100%);
+    border:1px solid var(--border);
+    margin-bottom:36px;
+    position:relative;
+    overflow:hidden;
+  }
+  header.hero::after{
+    content:"";
+    position:absolute;
+    right:-60px; top:-60px;
+    width:220px;height:220px;
+    background:radial-gradient(circle,rgba(255,93,93,.25),transparent 70%);
+  }
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    font-size:12px;
+    color:var(--accent);
+    font-weight:700;
+  }
+  h1{
+    font-size:34px;
+    margin:8px 0 6px;
+    letter-spacing:-.01em;
+  }
+  .tagline{
+    color:var(--muted);
+    font-size:15.5px;
+    max-width:640px;
+  }
+  .meta-row{
+    margin-top:18px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .pill{
+    font-size:12.5px;
+    padding:5px 12px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    color:var(--muted);
+    background:rgba(255,255,255,.02);
+  }
+
+  nav.toc{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px 24px;
+    margin-bottom:36px;
+  }
+  nav.toc h2{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--muted);
+    margin:0 0 12px;
+  }
+  nav.toc ol{
+    columns:2;
+    gap:24px;
+    margin:0;
+    padding-left:20px;
+    font-size:14.5px;
+  }
+  nav.toc li{margin-bottom:6px;}
+  nav.toc a{color:var(--accent-2); text-decoration:none;}
+  nav.toc a:hover{text-decoration:underline;}
+
+  section{
+    margin-bottom:34px;
+  }
+  section > h2{
+    font-size:22px;
+    margin:0 0 4px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    scroll-margin-top:20px;
+  }
+  section > h2 .num{
+    color:var(--accent);
+    font-variant-numeric:tabular-nums;
+    font-size:16px;
+  }
+  section > p.lead{
+    color:var(--muted);
+    margin:6px 0 18px;
+    font-size:15px;
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px 20px;
+    margin-bottom:14px;
+  }
+  .card h3{
+    margin:0 0 8px;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card h3 .tag{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    padding:2px 8px;
+    border-radius:999px;
+    font-weight:700;
+  }
+  .tag.fm{background:rgba(77,163,255,.15); color:var(--accent-2);}
+  .tag.new{background:rgba(255,207,92,.15); color:var(--accent-3);}
+  .tag.risk{background:rgba(255,93,93,.15); color:var(--accent);}
+
+  .card p{margin:0 0 8px; font-size:14.5px;}
+  .card p:last-child{margin-bottom:0;}
+  .card .example{
+    font-size:13.5px;
+    color:var(--muted);
+    border-left:3px solid var(--border);
+    padding-left:12px;
+    margin-top:10px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  @media (max-width:680px){
+    .grid{grid-template-columns:1fr;}
+    nav.toc ol{columns:1;}
+  }
+
+  .status-box{
+    background:var(--panel-2);
+    border:1px dashed var(--border);
+    border-radius:12px;
+    padding:18px 20px;
+  }
+  .status-box h3{margin:0 0 10px; font-size:15px; color:var(--accent-3);}
+  .status-box ul{margin:0; padding-left:20px; font-size:14.5px;}
+  .status-box li{margin-bottom:8px;}
+
+  .open-question{
+    background:rgba(77,163,255,.07);
+    border:1px solid rgba(77,163,255,.25);
+    border-radius:12px;
+    padding:18px 20px;
+  }
+  .open-question h3{margin:0 0 8px; font-size:15px; color:var(--accent-2);}
+  .open-question p{margin:0; font-size:14.5px;}
+
+  .editnote{
+    font-size:13px;
+    color:var(--muted);
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-top:6px;
+  }
+
+  footer{
+    margin-top:60px;
+    padding-top:20px;
+    border-top:1px solid var(--border);
+    color:var(--muted);
+    font-size:13px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Oyun Tasarım Dökümanı — Taslak v0.1</div>
+    <h1>Tekne</h1>
+    <p class="tagline">Football Manager'ın menajerlik derinliğini süper kahraman evreniyle birleştiren bir simülasyon/menajerlik oyunu. Kahramanları antrenman sahasına değil krizlere yollarsın; rakip kulüp yerine halkın güvenini, hükümeti ve egoyu yönetirsin.</p>
+    <div class="meta-row">
+      <span class="pill">Tür: Menajerlik / Simülasyon</span>
+      <span class="pill">Referans: Football Manager</span>
+      <span class="pill">Durum: Beyin fırtınası → temizlenmiş taslak</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <h2>İçindekiler</h2>
+    <ol>
+      <li><a href="#konsept">Genel Konsept</a></li>
+      <li><a href="#dongu">Temel Oyun Döngüsü</a></li>
+      <li><a href="#fm-mekanikleri">FM'den Alınan Temel Mekanikler</a></li>
+      <li><a href="#ekstra">Farklılaştırıcı Ekstra Detaylar</a></li>
+      <li><a href="#basin">Basın Toplantıları ve Medya</a></li>
+      <li><a href="#sosyal">Sosyal Medya Akışı</a></li>
+      <li><a href="#yetenek">Keşif, Wonderkid ve Potansiyel Sistemi</a></li>
+      <li><a href="#taktik">Taktik / Rol Uyumu</a></li>
+      <li><a href="#sozlesme">Sözleşme ve Diva Sendromu</a></li>
+      <li><a href="#tesis">Tesis ve Karargah Geliştirme</a></li>
+      <li><a href="#kurul">Hükümet / Kurul Baskısı</a></li>
+      <li><a href="#burnout">Yıpranma ve Tükenmişlik (Burnout)</a></li>
+      <li><a href="#kimya">Takım Kimyası ve Ego Savaşları</a></li>
+      <li><a href="#odul">Sezon Sonu ve Yıllık Değerlendirme</a></li>
+      <li><a href="#transfer">Transfer Penceresi, Serbest Kahramanlar ve Ödünç Verme</a></li>
+      <li><a href="#scout">Scout Ağı ve Keşif Bölgeleri</a></li>
+      <li><a href="#itibar">Rakip Ajanslar ve İtibar Sıralaması</a></li>
+      <li><a href="#menajer-itibar">Menajer İtibarı ve Kurul Güveni</a></li>
+      <li><a href="#coklu-evren">Çoklu-Evren Görevleri</a></li>
+      <li><a href="#emeklilik">Emeklilik ve Mentorluk</a></li>
+      <li><a href="#teknoloji">Teknoloji Yığını (Godot / 2D / PC + Android)</a></li>
+      <li><a href="#acik-sorular">Açık Sorular</a></li>
+      <li><a href="#oncelik">Önceliklendirme / Yol Haritası</a></li>
+    </ol>
+  </nav>
+
+  <section id="konsept">
+    <h2><span class="num">01</span> Genel Konsept</h2>
+    <p class="lead">Oyuncu bir süper kahraman ajansının menajeri olur. Amaç sadece güçlü bir kadro kurmak değil; o kadronun egosunu, ruh sağlığını, halkla ilişkilerini ve üstündeki siyasi baskıyı aynı anda yönetmektir. "Maç motoru" yerine oyuncunun karşısına şehirdeki krizler çıkar; kimin hangi krize gideceğine, hangi taktikle gideceğine karar verir.</p>
+    <div class="card">
+      <h3>Çekirdek his</h3>
+      <p>Football Manager'ı sevdiren şey aslında futbol değil, insan yönetimi ve sonuçların birikerek hikâye oluşturmasıdır. Tekne bu hissi süper kahraman temasına taşır: her kahraman bir karakter, her operasyon bir "maç haftası", her basın açıklaması bir kriz anı.</p>
+    </div>
+  </section>
+
+  <section id="dongu">
+    <h2><span class="num">02</span> Temel Oyun Döngüsü</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Ajans Yönetimi</h3>
+        <p>Kendi süper kahraman ajansını kurar, karargahı büyütür; antrenman salonları, laboratuvarlar, tıbbi kanatlar inşa eder.</p>
+      </div>
+      <div class="card">
+        <h3>Keşif ve Transfer</h3>
+        <p>Dünyanın dört bir yanından yeni yetenekler (mutantlar, uzaylılar, lab kazazedeleri) keşfeder, sözleşme imzalar.</p>
+      </div>
+      <div class="card">
+        <h3>Antrenman ve Gelişim</h3>
+        <p>Kahramanların güçlerini, dövüş tekniklerini ve PR (halkla ilişkiler) yeteneklerini geliştirir.</p>
+      </div>
+      <div class="card">
+        <h3>Kriz Yönetimi</h3>
+        <p>Haftalık/günlük olarak gelen acil durumlara doğru kahramanı, doğru taktikle yollar; sonuçlar halk desteğini ve moralini etkiler.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="fm-mekanikleri">
+    <h2><span class="num">03</span> FM'den Alınan Temel Mekanikler</h2>
+    <div class="card">
+      <h3>Moral ve Ego Yönetimi <span class="tag fm">FM'den</span></h3>
+      <p>Kahramanlar kaprisli futbolcular gibi davranır: "Hoca beni kadroya almıyor, mutsuzum" tarzı isyanlar çıkarabilir. Kimi kibirli, kimi depresif olur.</p>
+    </div>
+    <div class="card">
+      <h3>Sakatlıklar ve Yorgunluk <span class="tag fm">FM'den</span></h3>
+      <p>"Büyük güç, büyük sorumluluk getirir" ama büyük sakatlıklar da getirir. Yorgun bir kahramanı krize sürersen sakatlanır, uzun süre sahadan (görevden) uzak kalır.</p>
+    </div>
+    <div class="card">
+      <h3>Maç Motoru Yerine "Kriz Masası" <span class="tag new">Uyarlama</span></h3>
+      <p>Ekrana "Acil Durumlar" düşer (ör. "Şehir merkezine meteor düşüyor ve aynı anda banka soyuluyor"). Kadronun yorgunluğuna, güç uyumuna ve taktiğine göre kimin nereye gideceği seçilir.</p>
+      <div class="example">
+        <strong>Kriz Seviyeleri:</strong> D'den S'ye bir tehdit derecesi (D: mahalle olayı, S: şehir çapında felaket). Seviye yükseldikçe hem ödül (halk desteği, ödeme) hem risk (sakatlanma/burnout şansı) artar.<br><br>
+        <strong>Zaman baskısı:</strong> Her kriz bir geri sayımla gelir; süre dolmadan ekip yola çıkarılmazsa şiddet artar ve halk desteği otomatik düşer — FM'deki maç saatine karşılık gelir.<br><br>
+        <strong>Basit sonuç formülü (taslak):</strong> Başarı Şansı = Ekip Gücü × Taktik/Sinerji Uyumu − (Ortalama Yorgunluk + Kriz Seviyesi) + Menajer Bonusu (doğru brifing/istihbarat). Aynı anda birden fazla kriz çıkması, kadroyu bölmeyi ve önceliklendirmeyi zorunlu kılar.
+      </div>
+    </div>
+  </section>
+
+  <section id="ekstra">
+    <h2><span class="num">04</span> Farklılaştırıcı Ekstra Detaylar</h2>
+    <div class="card">
+      <h3>Halkla İlişkiler ve Sponsorlar</h3>
+      <p>Kahramanların suç çözerken bina yıkması halk desteğini düşürür. Medya açıklamalarıyla halkın sevgisi kazanılır; devletten veya şirketlerden sponsorluk bütçesi koparılır.</p>
+    </div>
+    <div class="card">
+      <h3>Gizli Kimlik Stresi</h3>
+      <p>Kahramanların sivil hayatı da yönetilir. Örn. okula yetişmesi gereken lise öğrencisi kahramanı gece operasyonuna yollarsan gündüz performansı (okulda/sivil hayatta) düşer.</p>
+    </div>
+  </section>
+
+  <section id="basin">
+    <h2><span class="num">05</span> Basın Toplantıları ve Medya Savaşları</h2>
+    <p class="lead">FM'in en gergin ama en keyifli anlarından biri, buraya doğrudan taşınıyor.</p>
+    <div class="card">
+      <p>Büyük bir kriz veya başarısız operasyon sonrası (örn. kahramanlar villain'ı kaçırıp şehre 2 milyon dolarlık zarar verdikten sonra) muhabirlerin karşısına geçilir.</p>
+      <p><strong>Seçenek örnekleri:</strong> "Kahramanımı savunurum" / "Suçu belediyeye atarım" / "Özür dilerim, daha dikkatli olacağız."</p>
+      <div class="example">Verilen cevaplar Halk Desteği ve kahramanın moralini doğrudan etkiler. Rakip ajans veya kötü adamlarla medya üzerinden sözlü dalaşlara (mind games) girilebilir.</div>
+    </div>
+    <div class="card">
+      <h3>Medya Anlatısı / Sezon Boyu Hikaye Momentumu <span class="tag new">Uyarlama</span></h3>
+      <p>Tek tek basın toplantıları yerine, medyanın kahraman veya ajans hakkında kurduğu bir "anlatı" birikerek ilerler — FM'deki takım formunun basın algısına yansıması gibi.</p>
+      <div class="example">Örn. üst üste iyi sonuçlar "Şehrin Yeni Umudu" anlatısını başlatır (sponsor teklifleri artar); üst üste hasar/skandal ise "Kontrolden Çıkan Kahramanlar" anlatısını tetikler (denetim çağrıları, hükümet baskısı artar — bkz. Hükümet/Kurul Baskısı). Anlatı, oyuncunun sonraki basın toplantısı seçeneklerini de değiştirir.</div>
+    </div>
+  </section>
+
+  <section id="sosyal">
+    <h2><span class="num">06</span> Sosyal Medya Akışı</h2>
+    <div class="card">
+      <p>FM'deki taraftar tepki ekranının karşılığı: bir Twitter/X benzeri akış. Kahramanların gizli hayranları ve trolleri olur.</p>
+      <div class="example">Örnek: Bir kahraman operasyonda başarısız olursa sosyal medyada <em>#AcemiKahramanİstifa</em> trend olur; kahraman bundan etkilenip depresyona girebilir ya da ego patlaması yaşayabilir.</div>
+    </div>
+  </section>
+
+  <section id="yetenek">
+    <h2><span class="num">07</span> Keşif, Wonderkid ve Potansiyel Sistemi</h2>
+    <div class="card">
+      <h3>Dinamik Yetenek Sistemi <span class="tag fm">FM'den</span></h3>
+      <p>Her kahramanın "Mevcut Gücü" (Current Ability) ve "Gizli Potansiyeli" (Potential Ability) olur — FM'deki -9/-10 wonderkid mantığı. Kimi çöp çıkar, kimi geleceğin ikonu olur.</p>
+    </div>
+    <div class="card">
+      <h3>Wonderkid Avı ve Riskleri <span class="tag risk">Risk mekaniği</span></h3>
+      <p>Ar-Ge/keşif ekibi banliyölere veya gizli laboratuvarlara yollanır. Bildirim gelir: "İzmir'in bir köyünde ellerinden elektrik çıkan 16 yaşında bir lise öğrencisi keşfettik."</p>
+      <div class="example">
+        Risk 1: Çok genç birini üst düzey göreve atarsan psikolojisi kaldıramayabilir, güçlerini kontrol edemeyip halk tepkisi patlatacak bir hata yapabilir.<br>
+        Risk 2: Potansiyeli yüksek sandığın çocuk aslında kahraman olmak istemeyip ekibi bırakabilir ("Matematik mühendisliği okuyacağım").
+      </div>
+    </div>
+    <div class="card">
+      <h3>Gizli Potansiyel Görünürlüğü ve Deneme Süreci <span class="tag new">Uyarlama</span></h3>
+      <p>Potansiyel, sözleşme imzalanmadan net görünmez — FM'deki scout güvenilirliği mantığı buraya taşınır.</p>
+      <div class="example">Zayıf bir scout raporu potansiyeli geniş bir aralık olarak gösterir (ör. "Potansiyel: 60-160 arası, belirsiz"); karargahın scout ağı geliştikçe bu aralık daralır. İmzalamadan önce kısa bir "Deneme Süreci" (gözlem/staj dönemi) sunulabilir: bu dönemde çocuk küçük, düşük riskli olaylara yollanır ve gerçek potansiyeli hakkında daha net veri toplanır — ama rakip ajanslar da aynı anda onu izliyor olabilir.</div>
+    </div>
+  </section>
+
+  <section id="taktik">
+    <h2><span class="num">08</span> Taktik ve Rol Uyumu</h2>
+    <div class="card">
+      <h3>Sinerji Sistemi <span class="tag fm">FM'den</span></h3>
+      <p>Kriz masasına yollanan ekibin birbiriyle uyumu (Synergy) kritik önemde. Örn. yanıcı güçleri olan biriyle buz gücü olan biri aynı ekipte dezavantaj yaratabilir (taktik uyumsuzluk).</p>
+      <p><strong>Roller:</strong> Tank, Alan Kontrolcüsü, Suikastçı, PR Yüzü.</p>
+    </div>
+  </section>
+
+  <section id="sozlesme">
+    <h2><span class="num">09</span> Sözleşme Görüşmeleri ve Diva Sendromu</h2>
+    <div class="card">
+      <h3>Sözleşme Kaprisi <span class="tag fm">FM'den</span></h3>
+      <p>S-Class bir kahraman dünyayı kurtarırken "Bu maaşla maske diktiremem, sponsorluk payımı artır ya da Justice League'e giderim" diye baskı yapabilir. Serbest kalma maddeleri ve gizli istekler (ör. "şu kahramanla aynı operasyona çıkmam") sözleşmeye eklenebilir.</p>
+      <div class="example">
+        <strong>Görüşme masasındaki başlıca kalemler:</strong> Maaş/pay, imaj hakları yüzdesi (ör. figür/film anlaşmalarından pay), "başrol klozu" (kriz anlarında kimin ön plana çıkacağı — ego çatışmalarını doğrudan besler), basın konuşma hakkı (kendi adına açıklama yapabilme özgürlüğü) ve serbest kalma bedeli.<br><br>
+        Rakip ajansların sezon ortasında sürpriz teklifle gelmesi (ör. daha yüksek görünürlük vaat eden bir ajans) mevcut sözleşmeyi yeniden görüşmeye zorlayabilir — FM'deki ara transfer dönemi baskısına karşılık gelir.
+      </div>
+    </div>
+    <div class="card">
+      <h3>İsyankar Yıldızlar / Diva Sendromu <span class="tag risk">Kritik mekanik</span></h3>
+      <p>Dünyanın en popüler, en güçlü kahramanı artık menajeri dinlemez hale gelir. Antrenmanları eker, kendi başına suç kovalamaya gider ("Ben zaten tek başıma da bir ekibim"). Takımdan atarsan halk ve sponsorlar isyan eder; kadroda tutarsan başa bela olur.</p>
+    </div>
+  </section>
+
+  <section id="tesis">
+    <h2><span class="num">10</span> Tesis ve Karargah Geliştirme</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Kuantum Laboratuvarı</h3>
+        <p>Kahramanların teknolojik ekipmanlarını (zırh, silah, gadget) güçlendirir.</p>
+      </div>
+      <div class="card">
+        <h3>Simülasyon Odası</h3>
+        <p>Danger Room tarzı; operasyon başarısını ve ekip sinerjisini artıran antrenmanlar sağlar.</p>
+      </div>
+      <div class="card">
+        <h3>Hapishane / Tecrit Bloğu</h3>
+        <p>Yakalanan süper kötülerin tutulduğu hücreler. Güvenlik zayıfsa kötüler kaçıp yeniden başa bela olur.</p>
+      </div>
+      <div class="card">
+        <h3>Bütçe Kısıtları</h3>
+        <p>Tesis geliştirme, yönetim kurulunun onayladığı bütçeye bağlıdır — bkz. Hükümet/Kurul Baskısı.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="kurul">
+    <h2><span class="num">11</span> Hükümet / Kurul Baskısı</h2>
+    <div class="card">
+      <p>Arkada menajeri sıkıştıran bir hükümet veya holding kurulu vardır. "Bize bütçeyi kıstılar, tesisleri büyütemezsek mutant laboratuvarı kuramayız" baskısı yaşanır.</p>
+      <div class="example">"Kılıcın Sırtındaki Damokles": Sadece kahramanlarla değil, arkandaki maliye/devlet/yatırımcılarla da uğraşırsın. Örn: "Bu ay binalarda oluşan 50 milyon dolarlık hasarı karşılamazsan lisansını iptal ederiz."</div>
+    </div>
+  </section>
+
+  <section id="burnout">
+    <h2><span class="num">12</span> Yıpranma ve Tükenmişlik (Burnout)</h2>
+    <div class="card">
+      <p>Futbolcular adale sakatlığı yaşar, kahramanlar ise ruhsal ve bedensel olarak çöker. Üst üste operasyona yollanan kahraman fiziksel değil <strong>mental</strong> olarak tükenir.</p>
+      <div class="example">Sonuçları: Depresyona giren kahraman görevde hata yapar, güçlerini yanlışlıkla sivillere yöneltebilir, ya da "iç huzurumu bulmam lazım" deyip aylarca ortadan kaybolabilir. Menajer olarak onu Dinlenme Odası'nda veya PR etkinliklerinde dinlendirip toparlamak gerekir.</div>
+    </div>
+    <div class="card">
+      <h3>İki Ayrı Bar: Enerji ve Ruh Sağlığı <span class="tag new">Uyarlama</span></h3>
+      <p>Yorgunluk (fiziksel) ile moral (mental) ayrı takip edilir; ikisi farklı hızlarda düşer ve farklı şekilde toparlanır.</p>
+      <div class="example">
+        Enerji operasyon sayısıyla düşer, dinlenmeyle hızlı toparlanır. Ruh Sağlığı ise medya baskısı, ego çatışmaları ve travmatik olaylarla (ör. bir sivili kurtaramamak) düşer ve yavaş toparlanır — terapi, anlamlı bir zafer veya uzun tatil gerektirir.<br><br>
+        <strong>Kırılma Noktası:</strong> Ruh Sağlığı kritik eşiğin altına düşerse rastgele bir "kırılma" olayı tetiklenir: kahraman izinsiz kaybolur, göreve gitmeyi reddeder ya da bir operasyonda aşırı güç kullanıp halk desteğine büyük zarar verir. Bu, menajerin sadece kadroyu değil, insanları da izlemesi gerektiğini hissettirir.
+      </div>
+    </div>
+  </section>
+
+  <section id="kimya">
+    <h2><span class="num">13</span> Takım Kimyası ve Ego Savaşları</h2>
+    <div class="card">
+      <p>Ajans içinde gruplaşmalar olur — uzaylı kökenli kahramanlar ile mutantlar birbirini sevmeyebilir; iki güçlü ego aynı operasyona gitmek istemeyebilir ("Bu takımın lideri benim, o maskeli velet bana emir veremez").</p>
+      <div class="example">Menajerlik hamlesi: Aralarını bulmak için etkinlik/parti düzenlemek, liderlik rolünü (kaptanlık) doğru kişiye vermek, ya da huzursuzluk çıkaranı transfer listesine koyup başka bir ajansa göndermek.</div>
+    </div>
+  </section>
+
+  <section id="odul">
+    <h2><span class="num">14</span> Sezon Sonu ve Yıllık Değerlendirme</h2>
+    <div class="card">
+      <p>Yıl sonunda "Kahramanlık Ödülleri" (Emmy/Oscar tarzı) ya da hükümetin huzurunda yıllık bilanço toplantısı yapılır.</p>
+      <div class="example">Şehre en çok zarar veren ama en popüler kahraman ödül alabilirken, menajer olarak başarısız olunduysa kapının önüne konulma (game over / kovulma ekranı) riski vardır.</div>
+    </div>
+  </section>
+
+  <section id="transfer">
+    <h2><span class="num">15</span> Transfer Penceresi, Serbest Kahramanlar ve Ödünç Verme</h2>
+    <p class="lead">Kadro değişimlerini belli dönemlere sıkıştırmak, oyuncuyu sürekli planlama yapmaya zorlar — FM'deki transfer penceresi mantığı.</p>
+    <div class="card">
+      <h3>Transfer Penceresi <span class="tag fm">FM'den</span></h3>
+      <p>Kahraman transferleri (başka ajanstan kapma, sözleşme bitenleri alma) yıl içinde belirli dönemlerde açılır. Pencere dışında sadece acil durum sözleşmeleri (yüksek bedelli, riskli) yapılabilir.</p>
+    </div>
+    <div class="card">
+      <h3>Serbest Kahramanlar</h3>
+      <p>Ajansı dağılmış, emekliliğini erteleyen veya skandal yüzünden kovulmuş kahramanlar serbest kalır. Ucuza kapatılabilir ama beraberinde itibar riski (halkın "neden onu aldın" tepkisi) getirebilir.</p>
+    </div>
+    <div class="card">
+      <h3>Ödünç Verme <span class="tag fm">FM'den</span></h3>
+      <p>Genç veya kadroda yeri sıkışmış bir kahraman, tecrübe kazanması için küçük bir bölgesel ajansa "ödünç" verilebilir. Orada oynadığı krizler gelişimini hızlandırır, ama sakatlanma/skandal riski menajerin kontrolü dışında gerçekleşir.</p>
+    </div>
+  </section>
+
+  <section id="scout">
+    <h2><span class="num">16</span> Scout Ağı ve Keşif Bölgeleri</h2>
+    <div class="card">
+      <h3>Bölgesel Scout Ağı <span class="tag fm">FM'den</span></h3>
+      <p>Dünya haritası keşif bölgelerine ayrılır (şehirler, ıssız bölgeler, hatta alternatif boyutlar). Her bölgeye scout atanır; scout'un deneyimi ve o bölgeye aşinalığı, çıkan raporların güvenilirliğini belirler.</p>
+      <div class="example">Az tanınan bir bölgeye (ör. "bilinmeyen bir uzay kolonisi") scout yollamak uzun sürer ve başta çok belirsiz raporlar döner; ağ geliştikçe (bkz. Tesis ve Karargah Geliştirme) daha hızlı ve net istihbarat gelir.</div>
+    </div>
+  </section>
+
+  <section id="itibar">
+    <h2><span class="num">17</span> Rakip Ajanslar ve İtibar Sıralaması</h2>
+    <p class="lead">FM'deki lig tablosunun karşılığı: kim "dünyanın en güvenilir kahraman ajansı" unvanını taşıyor?</p>
+    <div class="card">
+      <h3>İtibar Tablosu <span class="tag fm">FM'den</span></h3>
+      <p>Tüm ajanslar; halk güveni, çözülen kriz sayısı, verilen hasar ve skandal geçmişine göre bir sıralamada gösterilir. Üst sıradaki ajanslar daha iyi wonderkid'lere, daha büyük sponsorluk anlaşmalarına erişir.</p>
+      <div class="example">Rakip ajanslar sadece pasif bir tablo değil, aktif rakip olur: aynı kahramana teklif verir, aynı bölgeye scout yollar, hatta senin ajansından ayrılan huzursuz bir yıldızı transfer eder.</div>
+    </div>
+  </section>
+
+  <section id="menajer-itibar">
+    <h2><span class="num">18</span> Menajer İtibarı ve Kurul Güveni</h2>
+    <div class="card">
+      <h3>Kurul Güven Metre <span class="tag fm">FM'den</span></h3>
+      <p>Hükümet/kurul baskısı (bkz. bölüm 11) sadece bütçeyi değil, menajerin koltuğunu da etkiler. Sürekli hasar, skandal veya başarısız kriz yönetimi kurulun güvenini düşürür.</p>
+      <div class="example">Güven kritik seviyenin altına inerse menajer kovulma riskiyle karşılaşır (game over benzeri, ama kariyer modunda "başka bir ajansta işe başlama" seçeneğine dönüşebilir) — tıpkı FM'de düşük performansla kovulup başka bir kulüpte kariyere devam etmek gibi. Yüksek menajer itibarı ise daha büyük ajanslardan iş teklifi getirir.</div>
+    </div>
+  </section>
+
+  <section id="coklu-evren">
+    <h2><span class="num">19</span> Çoklu-Evren Görevleri</h2>
+    <p class="lead">FM'deki milli takım / uluslararası maça çağrılma mekaniğinin karşılığı.</p>
+    <div class="card">
+      <h3>Küresel İttifak Çağrısı <span class="tag fm">FM'den</span></h3>
+      <p>Belirli dönemlerde en güçlü kahramanlar, ajansın dışında bir küresel ittifaka (Justice League benzeri bir üst kurul) veya çoklu-evren krizine çağrılır. Menajer bu göreve kimin gideceğini seçemez — kahraman gider, ama yorgun/sakat dönebilir.</p>
+      <div class="example">Bu durum FM'deki "milli takım yorgunluğu" gerilimini birebir taşır: kendi kriz takviminle çakışabilir, kahramanı riske atar, ama reddedilirse hem o kahramanın hem ajansın küresel itibarı zarar görür.</div>
+    </div>
+  </section>
+
+  <section id="emeklilik">
+    <h2><span class="num">20</span> Emeklilik ve Mentorluk</h2>
+    <div class="card">
+      <h3>Yaşlanma ve Kariyer Sonu <span class="tag fm">FM'den</span></h3>
+      <p>Kahramanlar da yaşlanır (ya da güçleri zamanla zayıflar/yıpranır). Performans düşüşe geçtiğinde emeklilik gündeme gelir.</p>
+      <div class="example">Emekli olan bir kahraman antrenör/mentor rolüne geçip genç yeteneklerin gelişimini hızlandırabilir (bkz. Wonderkid sistemi) — ya da drama üretmek isteyen bir menajer için "gölgede kalmak istemeyip" ajanstan tamamen kopabilir.</div>
+    </div>
+  </section>
+
+  <section id="teknoloji">
+    <h2><span class="num">21</span> Teknoloji Yığını (Godot / 2D / PC + Android)</h2>
+    <p class="lead">Karar: Godot Engine ile tam 2D, PC ve Android için tek codebase'den çıkış, tamamen ücretsiz/CC0 assetlerle. Aşağıdaki liste büyük ölçüde ücretsiz — sadece iki kalemde (isteğe bağlı) küçük bir maliyet var, işaretlendi.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Motor ve Dil</h3>
+        <p><strong>Godot Engine 4.x</strong> (en güncel kararlı sürüm — godotengine.org/download'dan teyit edilmeli). Açık kaynak, tamamen ücretsiz, PC ve Android export'u kutudan çıkar.</p>
+        <p><strong>Dil: GDScript</strong> — bu ölçekte (2D, UI-ağırlıklı menajerlik) performans sorunu yaratmaz, öğrenmesi hızlı. C# alternatif ama ekstra .NET/JDK kurulumu ister, gerek yok.</p>
+      </div>
+      <div class="card">
+        <h3>Sürüm Kontrolü ve Proje Yönetimi</h3>
+        <p><strong>Git + GitHub/GitLab</strong> (ücretsiz private repo). Godot proje dosyaları (.tscn, .gd) metin tabanlı olduğu için diff/merge sorunsuz çalışır.</p>
+        <p>İş takibi için Trello / Notion / GitHub Projects (ücretsiz tier).</p>
+      </div>
+      <div class="card">
+        <h3>Ücretsiz 2D Asset Kaynakları</h3>
+        <p><strong>Kenney.nl</strong> — CC0 (kaynak belirtmeye bile gerek yok), UI kitleri/ikonlar/sprite'lar için birebir bu tarz bir menajerlik oyununa uygun.</p>
+        <p><strong>OpenGameArt.org</strong>, <strong>itch.io "free assets"</strong> bölümü, <strong>game-icons.net</strong> (CC-BY ikonlar) — her paketin lisansını tek tek kontrol et, bazıları kaynak gösterme ister.</p>
+        <p>Godot Editor içindeki <strong>Asset Library</strong> sekmesinden de hazır UI temaları/eklentiler indirilebilir.</p>
+      </div>
+      <div class="card">
+        <h3>Ses / Müzik</h3>
+        <p><strong>Freesound.org</strong> (CC0/CC-BY efektler), OpenGameArt müzik bölümü. Kendi müziğini yapmak istersen <strong>Bosca Ceoil</strong> veya <strong>LMMS</strong> — ikisi de ücretsiz.</p>
+      </div>
+      <div class="card">
+        <h3>Görsel Düzenleme</h3>
+        <p><strong>GIMP</strong> ve <strong>Inkscape</strong> — tamamen ücretsiz, asset uyarlama/UI görselleri için yeterli.</p>
+        <p><strong>Piskel</strong> (ücretsiz) veya <strong>Aseprite</strong> (tek seferlik ~20$ — pixel art endüstri standardı, isteğe bağlı).</p>
+      </div>
+      <div class="card">
+        <h3>Faydalı Godot Eklentileri</h3>
+        <p><strong>Dialogic</strong> — dallanan diyalog sistemi, "basın toplantısı" mekaniğin için birebir uygun (ücretsiz, Asset Library'de).</p>
+        <p><strong>GUT</strong> (Godot Unit Test) — kriz sonuç formülü gibi oyun mantığını test etmek için.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Veri ve Kayıt Sistemi</h3>
+      <p>Kahraman/kriz/olay verilerini Godot'un yerleşik <strong>Resource (.tres)</strong> sistemiyle tanımlamak, kod yazmadan yeni içerik (yeni kahraman, yeni kriz) eklemeyi kolaylaştırır — data-driven tasarım. Kayıt (save/load) için <strong>JSON + FileAccess</strong> yeterli; bu ölçekte ayrı bir veritabanı motoru (SQLite vb.) muhtemelen gereksiz.</p>
+    </div>
+
+    <div class="card">
+      <h3>Platform / Export</h3>
+      <p><strong>PC (Windows/Linux):</strong> Godot'un yerleşik export template'leriyle doğrudan .exe/.pck çıkışı — ekstra kurulum gerekmez.</p>
+      <p><strong>Android:</strong> Android Studio (SDK ve komut satırı araçları için) + uyumlu bir JDK sürümü + Android SDK + debug/release keystore gerekir. Godot Editor → Export ayarlarından "Install Android Build Template" ile kurulum yapılır; tam JDK/SDK sürüm gereksinimini kurulum anında Godot'un kendi Android export dokümantasyonundan teyit et (Godot sürümüne göre değişebiliyor).</p>
+      <p><strong>Google Play Console</strong> hesabı — Android'de yayınlamak için tek seferlik 25$ geliştirici ücreti (tek maliyetli kalemlerden biri).</p>
+    </div>
+
+    <div class="status-box">
+      <h3>Dağıtım / Test Notları</h3>
+      <ul>
+        <li><strong>PC dağıtımı:</strong> itch.io — indie oyunlar için ücretsiz/bağış-temelli, ilk sürüm için ideal bir ilk durak. Steam ileri aşamada düşünülebilir (100$ bandaj ücreti var).</li>
+        <li><strong>Android test:</strong> USB debugging + adb (Android SDK platform-tools ile birlikte gelir) ile fiziksel cihazda test; yayın öncesi Google Play Console'un "Internal testing" / "Closed testing" track'leri kullanılabilir.</li>
+      </ul>
+    </div>
+
+    <div class="editnote">Özet: Godot Engine + GDScript + Git + Kenney/OpenGameArt/itch.io (asset) + Freesound (ses) + GIMP/Inkscape (görsel) + Dialogic (diyalog) — hepsi ücretsiz. Tek olası maliyet: Aseprite (opsiyonel, ~20$) ve Google Play Console kaydı (Android'de yayınlamak için zorunlu, 25$ tek seferlik).</div>
+  </section>
+
+  <section id="acik-sorular">
+    <h2><span class="num">22</span> Açık Sorular</h2>
+    <div class="open-question">
+      <h3>Evren tonu ne olacak?</h3>
+      <p>The Boys tarzı karanlık, skandallarla dolu bir menajerlik mi; yoksa klasik Marvel/DC tarzı "altın kalpli kahramanları" yönettiğin daha sıcak bir simülasyon mu? Bu karar birçok sistemin (PR skandalları, kahraman davranışları, mizah dozu) tonunu belirleyecek — önce bu netleşmeli.</p>
+    </div>
+    <div class="editnote">Buraya konuşurken çıkan diğer açık soruları da ekleyebiliriz.</div>
+  </section>
+
+  <section id="oncelik">
+    <h2><span class="num">23</span> Önceliklendirme / Yol Haritası</h2>
+    <div class="status-box">
+      <h3>İlk hangi mekanikle başlanacak? (karar bekliyor)</h3>
+      <ul>
+        <li><strong>Kriz Masası + Taktik Uyum</strong> — çekirdek döngü olduğu için muhtemelen ilk prototip burada başlamalı.</li>
+        <li><strong>Keşif / Wonderkid Sistemi + Scout Ağı</strong> — kadro oluşturmanın temeli, erken test edilebilir.</li>
+        <li><strong>Moral / Burnout / Diva Sendromu</strong> — insan yönetimi katmanı, çekirdek döngü oturduktan sonra eklenebilir.</li>
+        <li><strong>Basın Toplantısı / Sosyal Medya / Medya Anlatısı</strong> — üst katman, daha sonraki bir aşamada.</li>
+        <li><strong>Transfer Penceresi / İtibar Sıralaması / Çoklu-Evren Görevleri</strong> — meta katman, çekirdek döngü ve kadro yönetimi oturduktan sonra; oyuna "canlı bir dünya" hissi katmak için ileri aşama.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Bu döküman ilk beyin fırtınası oturumundan derlendi. Taslak halinde — birlikte düzenlemeye devam edilecek.
+  </footer>
+
+</div>
+</body>
+</html>

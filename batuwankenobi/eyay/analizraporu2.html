@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dassault Systèmes (DSY) — Kapsamlı Equity Research Raporu</title>
+<style>
+  :root{
+    --bg:#eef1f5;
+    --paper:#ffffff;
+    --paper-2:#f7f9fb;
+    --ink:#111827;
+    --ink-soft:#5b6472;
+    --ink-faint:#8892a0;
+    --line:#e1e5eb;
+    --navy:#0b2545;
+    --navy-2:#13315c;
+    --navy-soft:#e8eef7;
+    --gold:#a9791f;
+    --gold-soft:#f7f0dc;
+    --pos:#1b7a4c;
+    --pos-soft:#e5f4ec;
+    --neg:#b7291a;
+    --neg-soft:#fbe8e5;
+    --warn:#a1650a;
+    --warn-soft:#fbf0dc;
+    --info:#1c5fa8;
+    --info-soft:#e4eefb;
+    --serif: Georgia, 'Times New Roman', 'Noto Serif', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); line-height:1.62; padding:0 16px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 0 90px;}
+
+  /* ===== TOP BAR ===== */
+  .topbar{
+    background:linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+    color:#eef2f8; margin:0 -16px 0; padding:28px 16px 22px;
+  }
+  .topbar-inner{max-width:1080px; margin:0 auto;}
+  .kicker{font-size:12px; letter-spacing:0.16em; text-transform:uppercase; color:#c9d4e6; font-weight:700; margin-bottom:8px;}
+  .topbar h1{font-family:var(--serif); font-size:clamp(24px,4vw,34px); margin:0 0 6px; font-weight:700; color:#fff;}
+  .topbar .sub{color:#c9d4e6; font-size:14.5px; max-width:70ch; margin-bottom:18px;}
+  .kpi-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:14px;}
+  .kpi{background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:10px; padding:10px 12px;}
+  .kpi .v{font-family:var(--serif); font-size:19px; font-weight:700; color:#fff; line-height:1.2;}
+  .kpi .v.neg{color:#ff9d8a;}
+  .kpi .v.pos{color:#8fe0b8;}
+  .kpi .l{font-size:10.5px; color:#b7c3d9; margin-top:3px; text-transform:uppercase; letter-spacing:0.04em;}
+  .score-badge{
+    display:inline-flex; align-items:baseline; gap:6px; background:var(--gold); color:#241a02;
+    padding:6px 14px; border-radius:999px; font-weight:700; font-size:14px; margin-top:14px;
+  }
+  .score-badge b{font-family:var(--serif); font-size:20px;}
+
+  /* ===== DISCLAIMER ===== */
+  .disclaimer{
+    margin:22px 0 30px; padding:16px 18px; background:var(--warn-soft);
+    border:1px solid #e8cf9a; border-radius:10px; font-size:13.5px; color:#5c4108;
+  }
+  .disclaimer strong{display:block; margin-bottom:4px; color:var(--warn);}
+
+  /* ===== TOC ===== */
+  .toc{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px 20px; margin-bottom:36px;}
+  .toc h2{font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin:0 0 10px;}
+  .toc ol{columns:2; column-gap:28px; margin:0; padding-left:18px; font-size:13.5px;}
+  .toc li{margin-bottom:6px; break-inside:avoid;}
+  .toc a{color:var(--navy); text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+  @media (max-width:600px){.toc ol{columns:1;}}
+
+  /* ===== SECTIONS ===== */
+  section{margin:0 0 50px; padding-top:8px; scroll-margin-top:14px;}
+  section > h2{
+    font-family:var(--serif); font-size:24px; margin:0 0 6px; color:var(--navy);
+    display:flex; align-items:baseline; gap:10px;
+  }
+  section > h2 .num{color:var(--gold); font-size:16px; font-weight:700;}
+  section > .section-lede{color:var(--ink-soft); font-size:14px; margin:0 0 20px; padding-bottom:14px; border-bottom:1px solid var(--line);}
+  h3{font-family:var(--serif); font-size:17px; color:var(--navy-2); margin:22px 0 10px;}
+  p{margin:0 0 14px;}
+  ul.plain, ol.plain{margin:0 0 14px; padding-left:20px; font-size:14.5px;}
+  ul.plain li, ol.plain li{margin-bottom:7px;}
+
+  /* ===== STAT CARDS ===== */
+  .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:0 0 22px;}
+  .stat{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .stat .num{font-family:var(--serif); font-size:22px; font-weight:700; color:var(--navy); line-height:1.15;}
+  .stat .num.neg{color:var(--neg);} .stat .num.pos{color:var(--pos);}
+  .stat .label{font-size:11.5px; color:var(--ink-soft); margin-top:4px;}
+
+  /* ===== TABLES ===== */
+  .table-scroll{overflow-x:auto; margin-bottom:20px;}
+  table{width:100%; border-collapse:collapse; font-size:13.3px; background:var(--paper); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  caption{text-align:left; font-size:12px; color:var(--ink-soft); margin-bottom:8px; caption-side:top; font-style:italic;}
+  th,td{padding:9px 11px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap;}
+  th:first-child, td:first-child{text-align:left; color:var(--ink); white-space:normal;}
+  thead th{background:var(--navy-soft); color:var(--navy); font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:0.03em;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--paper-2);}
+  td.pos{color:var(--pos); font-weight:700;} td.neg{color:var(--neg); font-weight:700;}
+  td.hl{background:var(--gold-soft); font-weight:700;}
+
+  /* ===== CALLOUTS ===== */
+  .flag{border-radius:10px; padding:14px 16px; margin:16px 0; font-size:14px; border:1px solid; display:flex; gap:10px;}
+  .flag .emoji{flex:none; font-size:17px; line-height:1.4;}
+  .flag.g{background:var(--pos-soft); border-color:#bfe3cd;}
+  .flag.r{background:var(--neg-soft); border-color:#f0c4bd;}
+  .flag.y{background:var(--warn-soft); border-color:#ecd6a3;}
+  .flag.b{background:var(--info-soft); border-color:#bcd6f0;}
+  .flag .flag-label{font-weight:700; display:block; margin-bottom:3px; font-size:12px; text-transform:uppercase; letter-spacing:0.04em;}
+  .flag.g .flag-label{color:var(--pos);} .flag.r .flag-label{color:var(--neg);}
+  .flag.y .flag-label{color:var(--warn);} .flag.b .flag-label{color:var(--info);}
+
+  .critical-box{
+    background:var(--navy); color:#eef2f8; border-radius:12px; padding:18px 20px; margin:20px 0;
+  }
+  .critical-box .cb-label{
+    font-weight:800; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:8px; display:flex; align-items:center; gap:6px;
+  }
+  .critical-box p{margin:0; color:#dde5f0; font-size:14.5px;}
+  .critical-box strong{color:#fff;}
+
+  /* ===== TWO COL ===== */
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .three-col{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media (max-width:700px){.two-col, .three-col{grid-template-columns:1fr;}}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+  .card h3{margin:0 0 8px; font-size:15px;}
+  .card.pos-b{border-left:4px solid var(--pos);}
+  .card.neg-b{border-left:4px solid var(--neg);}
+  .card.warn-b{border-left:4px solid var(--warn);}
+  .card ul{margin:0; padding-left:18px; font-size:13.5px;}
+  .card ul li{margin-bottom:6px;}
+
+  /* ===== BAR CHARTS (CSS only) ===== */
+  .barchart{margin:18px 0;}
+  .barchart .row{display:grid; grid-template-columns:70px 1fr 60px; align-items:center; gap:10px; margin-bottom:7px; font-size:12.5px;}
+  .barchart .row .yr{color:var(--ink-soft); text-align:right;}
+  .barchart .track{background:var(--line); border-radius:5px; height:16px; position:relative; overflow:hidden;}
+  .barchart .fill{height:100%; border-radius:5px; background:var(--navy);}
+  .barchart .fill.alt{background:var(--gold);}
+  .barchart .val{font-weight:700; color:var(--ink);}
+
+  /* ===== SCENARIO RANGE ===== */
+  .range-viz{position:relative; height:64px; margin:26px 0 10px; background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px 24px;}
+  .range-line{position:relative; height:6px; background:linear-gradient(90deg, var(--neg) 0%, var(--warn) 35%, var(--pos) 100%); border-radius:3px;}
+  .range-pt{position:absolute; top:-9px; width:2px; height:24px; background:var(--ink);}
+  .range-pt .rp-label{position:absolute; top:26px; left:50%; transform:translateX(-50%); font-size:11.5px; white-space:nowrap; text-align:center;}
+  .range-pt .rp-label b{display:block; font-family:var(--serif); font-size:14px;}
+  .range-pt.current{background:var(--navy); width:3px;}
+  .range-pt.current .rp-label{color:var(--navy); font-weight:700;}
+
+  /* ===== SCORECARD ===== */
+  .score-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:10px; margin:18px 0;}
+  .score-item{background:var(--paper); border:1px solid var(--line); border-radius:8px; padding:10px 14px;}
+  .score-item .si-top{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;}
+  .score-item .si-top b{color:var(--navy); font-family:var(--serif); font-size:15px;}
+  .score-bar{background:var(--line); border-radius:4px; height:8px; overflow:hidden;}
+  .score-bar span{display:block; height:100%; background:var(--gold);}
+
+  footer{margin-top:50px; padding-top:22px; border-top:1px solid var(--line); font-size:12px; color:var(--ink-soft);}
+  footer h3{font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink); margin:0 0 10px;}
+  footer ol{padding-left:18px; margin:0 0 18px;}
+  footer ol li{margin-bottom:6px;}
+  footer a{color:var(--navy);}
+  .final-note{font-style:italic;}
+
+  code, .kv{font-family:var(--mono); font-size:12.5px; background:var(--paper-2); padding:1px 5px; border-radius:4px;}
+
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0e1117; --paper:#171b23; --paper-2:#1d222c; --ink:#e9edf3; --ink-soft:#a3aebd; --ink-faint:#7c8797;
+      --line:#2a3140; --navy:#8fb3e0; --navy-2:#b7cee8; --navy-soft:#1b2636; --gold:#dcb56a; --gold-soft:#332811;
+      --pos:#7fd1ae; --pos-soft:#12261d; --neg:#e69686; --neg-soft:#2c1713; --warn:#e0b25f; --warn-soft:#2e2410;
+      --info:#8ec2f2; --info-soft:#122236;
+    }
+    .disclaimer{color:#f2d99e;}
+    .topbar{background:linear-gradient(135deg,#0a1830 0%, #14284a 100%);}
+    .critical-box{background:#1b2636; color:#e9edf3;}
+    .critical-box p{color:#c9d4e6;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="kicker">Kapsamlı Equity Research Raporu · Temel Analiz</div>
+      <h1>Dassault Systèmes SE</h1>
+      <div class="sub">Euronext Paris: DSY · OTC ADR: DASTY — CAD / PLM / mühendislik simülasyonu yazılımında küresel lider. 11 Eylül 2026 itibarıyla, erişilebilen kaynaklara dayalı kapsamlı temel analiz.</div>
+      <div class="kpi-grid">
+        <div class="kpi"><div class="v">€21,02</div><div class="l">Güncel Fiyat (10 Eyl 2026)</div></div>
+        <div class="kpi"><div class="v">€27,8 Mlyr</div><div class="l">Piyasa Değeri</div></div>
+        <div class="kpi"><div class="v">€6,21 Mlyr</div><div class="l">Gelir (TTM)</div></div>
+        <div class="kpi"><div class="v">%22,4</div><div class="l">Faaliyet Marjı (FY25)</div></div>
+        <div class="kpi"><div class="v pos">€1,47 Mlyr</div><div class="l">FCF (FY25, marj %23,6)</div></div>
+        <div class="kpi"><div class="v pos">€1,53 Mlyr</div><div class="l">Net Nakit (net borç değil)</div></div>
+        <div class="kpi"><div class="v">21,6x / 15,4x</div><div class="l">F/K (Trailing / İleriye Dönük)</div></div>
+        <div class="kpi"><div class="v pos">€25,60</div><div class="l">DCF Adil Değer (Base)</div></div>
+        <div class="kpi"><div class="v pos">+%21,8</div><div class="l">Base Senaryo Potansiyel</div></div>
+      </div>
+      <div class="score-badge">Genel Skor <b>70</b>/100</div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠️ Yatırım tavsiyesi değildir — veri kapsamı sınırlaması</strong>
+    Bu rapor bir finansal danışman tarafından hazırlanmamıştır ve alım/satım tavsiyesi değildir; yalnızca bilgilendirme amaçlıdır. Bu oturumda canlı web arama aracı çalışmadığından (proxy hatası), veriler tek tek çekilen (WebFetch) sayfalardan derlendi: stockanalysis.com (temel finansal veriler), Wikipedia, Bing haber/arama sonuçları. Şirketin resmi çeyrek raporuna, 20-F/Document d'Enregistrement Universel'ine veya AMF dosyalarına doğrudan erişilemedi — bu, birincil kaynak doğrulamasının eksik olduğu anlamına gelir. Segment/bölge bazlı gelir kırılımı, R&D harcaması, tam guidance geçmişi gibi bazı veriler <strong>bulunamadı veya doğrulanamadı</strong> ve rapor içinde açıkça bu şekilde işaretlendi. DCF ve senaryo değerlemeleri benim varsayımlarıma dayanan <strong>tahminlerdir</strong>, kaynak verisi değildir. Karar vermeden önce şirketin resmi kaynaklarını kontrol edin.
+  </div>
+
+  <nav class="toc">
+    <h2>İçindekiler</h2>
+    <ol>
+      <li><a href="#s1">Executive Summary</a></li>
+      <li><a href="#s2">Investment Thesis</a></li>
+      <li><a href="#s3">Company Overview</a></li>
+      <li><a href="#s4">Business Model</a></li>
+      <li><a href="#s5">Financial Analysis</a></li>
+      <li><a href="#s6">Balance Sheet</a></li>
+      <li><a href="#s7">Management &amp; Capital Allocation</a></li>
+      <li><a href="#s8">Competitive Landscape</a></li>
+      <li><a href="#s9">AI Analysis</a></li>
+      <li><a href="#s10">Industry &amp; Macro</a></li>
+      <li><a href="#s11">Risk Matrix</a></li>
+      <li><a href="#s12">Bull / Base / Bear</a></li>
+      <li><a href="#s13">Valuation</a></li>
+      <li><a href="#s14">Key Metrics to Track</a></li>
+      <li><a href="#s15">Red Flags</a></li>
+      <li><a href="#s16">Catalysts</a></li>
+      <li><a href="#s17">Final Verdict</a></li>
+      <li><a href="#s18">Sources</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============ 1. EXECUTIVE SUMMARY ============ -->
+  <section id="s1">
+    <h2><span class="num">01</span>Executive Summary</h2>
+    <p>Dassault Systèmes, havacılık/otomotiv/savunma sektörlerinde CAD ve PLM yazılımında derinlemesine yerleşik, yüksek geçiş maliyetine sahip bir küresel lider. Ancak 2022'de %16,6 olan gelir büyümesi 2025'te %0,36'ya, TTM'de -%1,7'ye gerilemiş durumda — <strong>büyüme fiilen durmuş</strong>. Buna karşın kârlılık ve sermaye verimliliği aynı dönemde güçlenmiş: net marj %16,4'ten %21,3'e, ROIC %10,5'ten %18,5'e çıkmış. Şirket net nakit pozisyonunda (€1,53 Mlyr), güçlü serbest nakit akışı üretiyor (FCF marjı ~%24) ve 1,8-2 milyar $'lık ArisGlobal devralımıyla zayıflayan yaşam bilimleri segmentini AI odaklı bir platforma dönüştürmeye çalışıyor.</p>
+    <p>Hisse fiyatı 52 haftalık zirveden ~%31 gerilemiş durumda; piyasa, mevcut fiyatta (Base varsayımlarla) yaklaşık <strong>%2,8-4,4 aralığında bir 10 yıllık büyüme</strong> fiyatlıyor gibi görünüyor — bu, şirketin kendi 2026 rehberinin (%3-5) alt-orta bandına denk düşüyor. Yani piyasa iyimser bir toparlanma senaryosunu fiyatlamıyor; bu da hem aşağı yönlü riskin sınırlı olduğuna hem de yukarı yönlü sürprizin (AI monetizasyonu, ArisGlobal başarısı, endüstriyel toparlanma) fiyatlanmadığına işaret ediyor.</p>
+    <p>DCF bazlı üç senaryoda adil değer aralığı <strong>€12,12 (Bear) — €25,60 (Base) — €39,03 (Bull)</strong> olarak hesaplandı; mevcut fiyat (€21,02) bu aralığın Base senaryonun biraz altında, Bear'ın belirgin üzerinde bir noktasında duruyor. Genel skor: <strong>70/100</strong> — kaliteli ama şu anda büyüme sorunu yaşayan, makul (ucuz olmayan ama pahalı da olmayan) fiyatlanmış bir sektör lideri.</p>
+  </section>
+
+  <!-- ============ 2. INVESTMENT THESIS ============ -->
+  <section id="s2">
+    <h2><span class="num">02</span>Investment Thesis</h2>
+    <p class="section-lede">Kısa tez özeti — tam gerekçelendirilmiş al/alma nedenleri için bkz. Bölüm 17 (Final Verdict)</p>
+    <p>Yatırım tezi üç ayak üzerine kurulu:</p>
+    <div class="three-col">
+      <div class="card">
+        <h3>1) Kalite ve hendek</h3>
+        <p style="font-size:13.5px; margin:0;">CATIA/SOLIDWORKS/ENOVIA gibi ürünler, uçak ve otomobil tasarım iş akışlarına o kadar derinlemesine gömülü ki geçiş maliyeti fiilen prohibitif. Bu, düşük büyüme döneminde bile fiyatlama gücü ve %84 brüt marj koruyor.</p>
+      </div>
+      <div class="card">
+        <h3>2) Yeniden hızlanma opsiyonu</h3>
+        <p style="font-size:13.5px; margin:0;">AI-native 3DEXPERIENCE (AURA/LEO/MARIE) ve ArisGlobal devralımı, şu an gelire yansımamış iki potansiyel büyüme motoru. Piyasa bunları henüz fiyatlamıyor gibi görünüyor (reverse-DCF bulgusu, Bölüm 13).</p>
+      </div>
+      <div class="card">
+        <h3>3) Değerleme sıfırlanması</h3>
+        <p style="font-size:13.5px; margin:0;">%31'lik düşüş sonrası ileriye dönük F/K (15,4x) artık tarihsel prim seviyesinde değil, PTC/Autodesk emsal ortalamasına yakın — kalite/büyüme dengesi göz önüne alındığında aşırı pahalı değil.</p>
+      </div>
+    </div>
+    <div class="flag y">
+      <span class="emoji">🟡</span>
+      <div><span class="flag-label">İzlenmesi gereken karşı-tez</span>Bu üç ayağın hiçbiri henüz sayılarla kanıtlanmadı — büyüme hâlâ negatif, ArisGlobal kapanmadı/entegre olmadı, AI ürünleri Temmuz 2026'da duyuruldu. Tez şu an büyük ölçüde <strong>ileriye dönük bir bahis</strong>, mevcut sonuçların doğrulaması değil.</div>
+    </div>
+  </section>
+
+  <!-- ============ 3. COMPANY OVERVIEW ============ -->
+  <section id="s3">
+    <h2><span class="num">03</span>Company Overview</h2>
+    <p>1981'de Francis Bernard tarafından Dassault Group'tan (havacılık) ayrılarak kuruldu; CATIA yazılımı Boeing 777 ve Rafale gibi projelerde kullanıldı ve bugün dünyadaki yeni uçakların ~%70'i, yeni otomobillerin ~%40'ı bu ekosistemde tasarlanıyor (Wikipedia, tarih belirtilmemiş — güncel oran doğrulanamadı). 1996'dan beri hem Paris Borsası'nda hem (o dönem) Nasdaq'ta işlem görüyor.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="num">1981</div><div class="label">Kuruluş</div></div>
+      <div class="stat"><div class="num">Vélizy, FR</div><div class="label">Merkez (+ Shanghai, Boston)</div></div>
+      <div class="stat"><div class="num">~25.000</div><div class="label">Çalışan (188 ofis)</div></div>
+      <div class="stat"><div class="num">%41</div><div class="label">Ar-Ge'de çalışan oranı</div></div>
+      <div class="stat"><div class="num">%39,91</div><div class="label">GIMD (kurucu aile) payı</div></div>
+      <div class="stat"><div class="num">1,32 Mlyr</div><div class="label">Toplam hisse sayısı</div></div>
+    </div>
+    <h3>Sahiplik ve yönetişim</h3>
+    <p>Groupe Industriel Marcel Dassault (GIMD) %39,91 ile kontrol hissesine sahip; halka açık kısım %49,38. stockanalysis.com'a göre içeriden sahiplik %9,00, kurumsal sahiplik %25,58, serbest dolaşımdaki hisse 669 milyon (toplamın yaklaşık yarısı). Bu yapı, kurucu aile kontrolünün sürdüğü, azınlık pay sahiplerinin yönetim üzerindeki etkisinin sınırlı olduğu tipik bir Avrupa aile-kontrollü şirket profili.</p>
+    <h3>Liderlik</h3>
+    <p><strong>Pascal Daloz</strong>, 2024 başında Bernard Charlès'in (43 yıllık görev süresi) çekilmesiyle CEO oldu; yaklaşık 5 ay önce (Nisan 2026 civarı) yönetim kurulu başkanlığını da üstlenerek CEO+Başkan rolünü birleştirdi. Bu, şirketin kurucu-sonrası döneme geçişinin yeni ve henüz uzun vadede test edilmemiş bir aşaması.</p>
+    <div class="flag y"><span class="emoji">🟡</span><div><span class="flag-label">Veri sınırlaması</span>Daloz'un CEO öncesi geçmişi (Dassault içindeki kariyeri, stratejik önceliklerinin Charlès döneminden farkı) bu oturumda birincil kaynaklarla doğrulanamadı.</div></div>
+  </section>
+
+  <!-- ============ 4. BUSINESS MODEL ============ -->
+  <section id="s4">
+    <h2><span class="num">04</span>Business Model</h2>
+    <p>Tüm ürün portföyü 2012'de lanse edilen <strong>3DEXPERIENCE</strong> platformu altında birleşiyor:</p>
+    <div class="two-col">
+      <div class="card">
+        <h3>Endüstriyel çekirdek</h3>
+        <ul>
+          <li><strong>CATIA</strong> — üst segment CAD tasarım (havacılık/otomotiv çekirdeği)</li>
+          <li><strong>SOLIDWORKS</strong> — orta segment / KOBİ CAD, en geniş kullanıcı tabanı</li>
+          <li><strong>ENOVIA</strong> — ürün yaşam döngüsü yönetimi (PLM)</li>
+          <li><strong>DELMIA</strong> — üretim operasyonları / dijital fabrika (MES dahil)</li>
+          <li><strong>SIMULIA</strong> — mühendislik simülasyonu (Abaqus temelli, 2005 devralımı)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Yaşam bilimleri &amp; diğer</h3>
+        <ul>
+          <li><strong>MEDIDATA</strong> — klinik deneme yönetimi (2019 devralımı)</li>
+          <li><strong>BIOVIA</strong> — bilimsel/ilaç modelleme</li>
+          <li><strong>ArisGlobal</strong> (2026 devralım süreci) — klinik yazılım, AI odaklı</li>
+          <li><strong>OUTSCALE</strong> — Avrupa egemen bulut altyapısı</li>
+          <li><strong>3DEXCITE, GEOVIA, NETVIBES</strong> — sektörel çözümler</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Gelir modeli ve müşteri profili</h3>
+    <p>Şirket, geleneksel kullanıcı başına lisanslamadan uzaklaşıp abonelik/"daha akışkan, yapay zekâ destekli" bir fiyatlandırma modeline geçiş yapıyor (haber kaynaklarında bahsedilen "pricing overhaul"). Ana müşteri sektörleri: havacılık &amp; savunma, otomotiv (özellikle EV dönüşümü), endüstriyel ekipman/makine (JSW Greentech örneği), yaşam bilimleri/ilaç. Büyük kurumsal müşteriler (Boeing, Airbus benzeri OEM'ler) tipik profil; KOBİ tarafı ağırlıklı olarak SOLIDWORKS üzerinden.</p>
+    <div class="flag y">
+      <span class="emoji">🟡</span>
+      <div><span class="flag-label">Doğrulanamayan veri</span><strong>Recurring/subscription gelir oranı, ürün bazlı gelir kırılımı (CATIA vs SOLIDWORKS vs diğerleri) ve bölge bazlı gelir dağılımı</strong> bu oturumda erişilebilen kaynaklarda sayısal olarak bulunamadı. Haberlerde "recurring revenue strength" vurgusu tekrarlanıyor ama yüzde verilmiyor. Wikipedia'daki %42 Avrupa / %32 Asya-Okyanusya / %26 Amerika dağılımı <strong>çalışan</strong> dağılımıdır, gelir dağılımı değildir — karıştırılmamalı. Bu, şirketin resmi çeyrek sunumundan (investor presentation) doğrulanması gereken kritik bir boşluk.</div>
+    </div>
+
+    <h3>Ekonomik hendek (moat) analizi</h3>
+    <div class="two-col">
+      <div class="card pos-b">
+        <h3>Güçlü savunma hatları</h3>
+        <ul>
+          <li><strong>Switching cost — çok yüksek:</strong> Onlarca yıllık tasarım verisi, mühendislik iş akışları ve tedarik zinciri entegrasyonları CATIA/ENOVIA etrafında kurulu; bir OEM'in CAD/PLM sistemini değiştirmesi yıllar sürer ve operasyonel risk taşır.</li>
+          <li><strong>Marka/itibar &amp; sertifikasyon:</strong> Havacılık/savunmada yazılımın kendisi düzenleyici onay sürecinin parçası; yeni bir tedarikçiyle bu süreç baştan başlar.</li>
+          <li><strong>Veri avantajı:</strong> "Living Heart Project" gibi alan-spesifik simülasyon modelleri, yıllar içinde biriken alan bilgisiyle taklit edilmesi zor.</li>
+        </ul>
+      </div>
+      <div class="card warn-b">
+        <h3>Zayıf/tartışmalı hatlar</h3>
+        <ul>
+          <li><strong>Network effect — sınırlı:</strong> Klasik anlamda kullanıcı-tabanlı ağ etkisi (ör. sosyal ağ) yok; işbirliği platformu etkisi (ortak tedarik zincirinde aynı formatı kullanma zorunluluğu) dolaylı bir ağ etkisi yaratıyor ama bu kırılgan olabilir.</li>
+          <li><strong>KOBİ segmentinde (SOLIDWORKS) geçiş maliyeti daha düşük</strong> — Autodesk Fusion, Onshape gibi bulut-native alternatifler bu segmentte daha rekabetçi.</li>
+          <li><strong>AI, uzun vadede bu hendeği aşındırabilir</strong> — bkz. Bölüm 9.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. FINANCIAL ANALYSIS ============ -->
+  <section id="s5">
+    <h2><span class="num">05</span>Financial Analysis</h2>
+    <p class="section-lede">Kaynak: stockanalysis.com (EPA:DSY) — IFRS/GAAP bazlı raporlanmış veriler, FY2021-FY2025 + TTM (Eylül 2026 itibarıyla)</p>
+
+    <div class="table-scroll">
+    <table>
+      <caption>Gelir tablosu (milyon €)</caption>
+      <thead><tr><th>Metrik</th><th>TTM</th><th>FY2025</th><th>FY2024</th><th>FY2023</th><th>FY2022</th></tr></thead>
+      <tbody>
+        <tr><td>Gelir</td><td>6.206</td><td>6.236</td><td>6.214</td><td>5.951</td><td>5.665</td></tr>
+        <tr><td>Brüt kâr</td><td>5.228</td><td>5.221</td><td>5.197</td><td>4.980</td><td>4.746</td></tr>
+        <tr><td>Faaliyet kârı (IFRS)</td><td>1.554</td><td>1.395</td><td>1.376</td><td>1.290</td><td>1.319</td></tr>
+        <tr><td>Net kâr</td><td>1.324</td><td>1.196</td><td>1.200</td><td>1.051</td><td>932</td></tr>
+        <tr><td>Gelir büyümesi</td><td class="neg">-%1,69</td><td class="pos">+%0,36</td><td class="pos">+%4,41</td><td class="pos">+%5,05</td><td class="pos">+%16,57</td></tr>
+        <tr><td>Brüt marj</td><td>%84,24</td><td>%83,73</td><td>%83,64</td><td>%83,69</td><td>%83,77</td></tr>
+        <tr><td>Faaliyet marjı</td><td>%25,04</td><td>%22,37</td><td>%22,14</td><td>%21,68</td><td>%23,28</td></tr>
+        <tr><td>Net marj</td><td>%21,33</td><td>%19,18</td><td>%19,32</td><td>%17,66</td><td>%16,44</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="barchart">
+      <h3 style="margin-top:0;">Gelir büyümesi trendi (yıllık, %)</h3>
+      <div class="row"><span class="yr">2022</span><div class="track"><div class="fill" style="width:100%"></div></div><span class="val">+16,6%</span></div>
+      <div class="row"><span class="yr">2023</span><div class="track"><div class="fill" style="width:30%"></div></div><span class="val">+5,1%</span></div>
+      <div class="row"><span class="yr">2024</span><div class="track"><div class="fill" style="width:27%"></div></div><span class="val">+4,4%</span></div>
+      <div class="row"><span class="yr">2025</span><div class="track"><div class="fill" style="width:2%"></div></div><span class="val">+0,4%</span></div>
+      <div class="row"><span class="yr">TTM</span><div class="track"><div class="fill alt" style="width:10%"></div></div><span class="val neg">-1,7%</span></div>
+    </div>
+
+    <h3>Neden yavaşladı? — yorumlama</h3>
+    <p>2022'nin %16,6'lık büyümesi kısmen 2021 pandemi-sonrası toparlanma ve yüksek enflasyon/fiyatlama etkisiyle şişmiş bir baz olabilir (bu, doğrulanamayan ama makul bir yorum). 2023-2024'te büyüme kademeli olarak %5'in altına indi — bu dönemde küresel kurumsal yazılım harcamalarında genel bir yavaşlama vardı (yüksek faiz ortamı, IT bütçe disiplini). 2025-2026'da düşüşün asıl sürükleyicisi haberlerde tekrarlanan <strong>yaşam bilimleri segmentindeki zayıflık</strong> ve muhtemelen endüstriyel tarafta döngüsel bir yavaşlama; TTM'deki negatif büyüme, çeyreksel bazda henüz dip yapılmadığına işaret ediyor olabilir. <strong>Ancak bu nedensellik zincirini segment bazlı veriyle doğrulayamadım</strong> — yalnızca haber başlıklarındaki niteliksel ifadelere ("Industrial Growth Is Back, But Life Sciences Segment Is Still Weak" — Seeking Alpha) dayanıyor.</p>
+
+    <div class="table-scroll">
+    <table>
+      <caption>Kârlılık ve sermaye verimliliği oranları</caption>
+      <thead><tr><th>Metrik</th><th>Güncel</th><th>FY2025</th><th>FY2024</th><th>FY2023</th><th>FY2022</th><th>FY2021</th></tr></thead>
+      <tbody>
+        <tr><td>ROE</td><td class="hl">%15,09</td><td>%13,29</td><td>%14,16</td><td>%13,84</td><td>%13,74</td><td>%13,68</td></tr>
+        <tr><td>ROA</td><td>%6,32</td><td>%5,70</td><td>%5,70</td><td>%5,58</td><td>%5,79</td><td>%4,83</td></tr>
+        <tr><td>ROIC</td><td class="hl pos">%18,45</td><td>%14,17</td><td>%13,88</td><td>%13,01</td><td>%11,87</td><td>%10,45</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="flag g">
+      <span class="emoji">🟢</span>
+      <div><span class="flag-label">Gözden kaçabilecek pozitif sinyal</span>Büyüme dururken <strong>ROIC 2021'den bugüne neredeyse ikiye katlanarak %10,5'ten %18,5'e çıkmış</strong>. Bu, şirketin büyümeden ziyade sermaye verimliliği/disiplinine odaklandığının güçlü bir kanıtı — kalitesiz bir "büyüme durgunluğu" hikâyesinden çok, bilinçli bir "kârlılığa geçiş" evresi olabileceğine işaret ediyor. Bu ayrım yatırım tezi için önemli.</div>
+    </div>
+
+    <h3>Nakit akışı ve sermaye getirisi</h3>
+    <div class="table-scroll">
+    <table>
+      <caption>Nakit akışı (milyon €)</caption>
+      <thead><tr><th>Metrik</th><th>TTM</th><th>FY2025</th><th>FY2024</th><th>FY2023</th><th>FY2022</th></tr></thead>
+      <tbody>
+        <tr><td>Faaliyet nakit akışı</td><td>1.720</td><td>1.630</td><td>1.660</td><td>1.565</td><td>1.525</td></tr>
+        <tr><td>Serbest nakit akışı (FCF)</td><td>1.590</td><td>1.469</td><td>1.466</td><td>1.420</td><td>1.393</td></tr>
+        <tr><td>FCF marjı</td><td>%25,62</td><td>%23,56</td><td>%23,60</td><td>%23,86</td><td>%24,59</td></tr>
+        <tr><td>Capex</td><td>-129,5</td><td>-160,5</td><td>-193,4</td><td>-145,3</td><td>-132,3</td></tr>
+        <tr><td>Hisse bazlı ödeme (SBC)</td><td>133,7</td><td>174,8</td><td>190,4</td><td>184,2</td><td>166,7</td></tr>
+        <tr><td>Temettü ödemesi</td><td>-357,5</td><td>-342,6</td><td>-302,7</td><td>-276,2</td><td>-223,5</td></tr>
+        <tr><td>Hisse geri alımı</td><td>-175,4</td><td>-340,3</td><td>-374,0</td><td>-375,4</td><td>-639,6</td></tr>
+        <tr><td>M&amp;A harcaması</td><td>-14,5</td><td>-203,5</td><td>-22,5</td><td>-16,1</td><td>-46,4</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>Capex yoğunluğu düşük (gelirin ~%2'si) — tipik bir yazılım şirketi profili. FCF, FY2025'te net kârın (1.196) üzerinde (1.469) — bu, amortisman/itfa gibi nakit çıkışı olmayan kalemlerin (muhtemelen geçmiş devralımlardan gelen maddi olmayan varlık itfası) net kârı aşağı çektiğine işaret ediyor; yani <strong>FCF, gerçek nakit üretme gücünü net kârdan daha iyi yansıtıyor.</strong></p>
+  </section>
+
+  <!-- ============ 6. BALANCE SHEET ============ -->
+  <section id="s6">
+    <h2><span class="num">06</span>Balance Sheet — Bilanço Kalitesi</h2>
+    <div class="table-scroll">
+    <table>
+      <caption>Bilanço özeti (milyon €)</caption>
+      <thead><tr><th>Metrik</th><th>FY2025</th><th>FY2024</th><th>FY2023</th><th>FY2022</th><th>FY2021</th></tr></thead>
+      <tbody>
+        <tr><td>Toplam varlıklar</td><td>15.059</td><td>15.546</td><td>14.623</td><td>14.261</td><td>14.219</td></tr>
+        <tr><td>Toplam yükümlülükler</td><td>6.262</td><td>6.465</td><td>6.776</td><td>6.936</td><td>8.008</td></tr>
+        <tr><td>Toplam özkaynak</td><td>8.798</td><td>9.081</td><td>7.846</td><td>7.325</td><td>6.211</td></tr>
+        <tr><td>Nakit ve benzerleri</td><td>4.125</td><td>3.953</td><td>3.568</td><td>2.769</td><td>2.980</td></tr>
+        <tr><td>Toplam borç</td><td>2.595</td><td>2.494</td><td>2.991</td><td>2.996</td><td>3.870</td></tr>
+        <tr><td>Net nakit / (net borç)</td><td class="pos">+1.530</td><td class="pos">+1.459</td><td class="pos">+578</td><td class="neg">-227</td><td class="neg">-890</td></tr>
+        <tr><td>Şerefiye (goodwill)</td><td>4.714</td><td>5.046</td><td>4.805</td><td>4.971</td><td>4.712</td></tr>
+        <tr><td>Maddi olmayan varlıklar</td><td>2.155</td><td>2.641</td><td>2.842</td><td>3.302</td><td>3.463</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="table-scroll">
+    <table>
+      <caption>Likidite ve kaldıraç oranları</caption>
+      <thead><tr><th>Metrik</th><th>Güncel</th><th>FY2025</th><th>FY2024</th><th>FY2023</th><th>FY2022</th><th>FY2021</th></tr></thead>
+      <tbody>
+        <tr><td>Cari oran</td><td>1,99</td><td>1,60</td><td>1,87</td><td>1,62</td><td>1,68</td><td>1,36</td></tr>
+        <tr><td>Borç/Özkaynak</td><td>0,36</td><td>0,36</td><td>0,34</td><td>0,46</td><td>0,49</td><td>0,72</td></tr>
+        <tr><td>Net Borç/FAVÖK</td><td>-1,36</td><td>-0,58</td><td>-0,56</td><td>0,02</td><td>0,52</td><td>1,19</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="flag r">
+      <span class="emoji">🔴</span>
+      <div><span class="flag-label">Görünenden daha riskli olabilecek nokta: Şerefiye + maddi olmayan varlık yoğunluğu</span>Şerefiye + maddi olmayan varlıklar toplamı FY2025'te ~€6,87 Mlyr — <strong>toplam varlıkların ~%46'sı</strong>. Bu, agresif devralım tarihçesinin (SolidWorks, Abaqus, MatrixOne, Medidata, şimdi ArisGlobal) bilançoda biriken izi. Yaşam bilimleri segmentinin (Medidata/BIOVIA) zayıflığı sürerse, bu birime atfedilen şerefiyede <strong>değer düşüklüğü (impairment) riski</strong> somut bir olasılık — bu, gelecekte tek seferlik büyük bir muhasebe zararı olarak karşımıza çıkabilir ve ilk bakışta gelir tablosunda görünmeyen bir risk.</div>
+    </div>
+    <div class="flag y">
+      <span class="emoji">🟡</span>
+      <div><span class="flag-label">Doğrulanamayan alanlar</span><strong>Ertelenmiş gelir (deferred revenue), çalışma sermayesi detayları, emeklilik/pension yükümlülükleri</strong> bu oturumda erişilebilen kaynaklarda bulunamadı. Abonelik modeline geçiş yapan bir yazılım şirketi için ertelenmiş gelir trendi (büyüyor mu, küçülüyor mu) aslında gelecekteki gelirin öncü göstergesi olurdu — bu veri boşluğu, analizin en önemli eksiklerinden biri.</div>
+    </div>
+    <p><strong>Genel değerlendirme:</strong> Net nakit pozisyonu (2023'te net borçtan 2024-2025'te net nakide geçiş), düşen borç/özkaynak oranı (0,72→0,36) ve iyileşen cari oran (1,36→1,99) bilançonun 2021'den bugüne belirgin şekilde güçlendiğini gösteriyor. Zayıf nokta, devralım-yoğun büyüme stratejisinin bilançoda bıraktığı şerefiye yükü.</p>
+  </section>
+
+  <!-- ============ 7. MANAGEMENT & CAPITAL ALLOCATION ============ -->
+  <section id="s7">
+    <h2><span class="num">07</span>Management &amp; Capital Allocation</h2>
+    <p><strong>Pascal Daloz</strong> (CEO, 2024'ten beri; 2026'dan beri aynı zamanda Yönetim Kurulu Başkanı) — <strong>Bernard Charlès</strong>'ın 43 yıllık görev süresinin ardından devraldığı bir kurumsal kültürü yönetiyor. Bu uzunlukta bir liderlik döneminin ardından gelen geçişler tarihsel olarak stratejik sürekliliğin test edildiği dönemlerdir; henüz Daloz döneminde tam bir yıllık döngü (guidance verme → gerçekleşme → yeni guidance) tamamlanmadı.</p>
+
+    <div class="critical-box">
+      <div class="cb-label">🎯 Yatırımcı İçin Kritik</div>
+      <p>Son 4 yılda ortalama <strong>~€430M/yıl</strong> hisse geri alımına rağmen toplam hisse sayısı yalnızca <strong>%0,10 (YoY) azaldı</strong>. Bunun nedeni, yıllık ~€170-190M'lik hisse bazlı ödemenin (SBC) geri alımların büyük kısmını fiilen dengelemesi. Yani şirketin "hissedarlara sermaye iadesi" hikâyesi görünüşte güçlü (yüksek buyback rakamları) ama <strong>gerçek etki, hisse sayısını küçültmekten çok yönetici/çalışan tazminatının seyreltme etkisini nötralize etmek</strong> — bu, çoğu yatırımcının başlık rakamlarına bakarken gözden kaçırdığı bir nüans.</p>
+    </div>
+
+    <h3>Sermaye tahsisi tarihçesi (2022-2025, TTM)</h3>
+    <ul class="plain">
+      <li><strong>Temettü:</strong> İstikrarlı şekilde artıyor (€223M → €358M, ~4 yılda ~%60 artış), getiri mütevazı (%1,20) — büyüme şirketinden çok dengeli bir profil sinyali.</li>
+      <li><strong>Buyback:</strong> 2022'de zirve (€640M), sonrasında kademeli azalış (~€175-375M/yıl) — muhtemelen ArisGlobal gibi devralımlara nakit ayırmak için buybackın hafifletildiğine işaret ediyor.</li>
+      <li><strong>M&amp;A:</strong> FY2025'te belirgin sıçrama (€204M, önceki yıllara göre 5-10x) — ArisGlobal öncesi hazırlık/küçük tamamlayıcı alımlar olabilir; ArisGlobal'ın kendisi ($1,8-2 Mlyr) henüz bu tabloya tam yansımadı (anlaşma duyurusu ~1 ay önce, kapanış tarihi netleşmedi).</li>
+    </ul>
+
+    <h3>Guidance isabeti</h3>
+    <div class="flag y">
+      <span class="emoji">🟡</span>
+      <div><span class="flag-label">Doğrulanamadı</span>Şirketin 2023-2025 döneminde başlangıç guidance'ını ne ölçüde tuttuğu/ıskaladığı bu oturumda kaynaklarla doğrulanamadı (arama sonuç vermedi). Bilinen tek veri noktası: 2026 için Temmuz 2026'da "confirms 2026 outlook" (yıllık rehberi teyit etti) — bu, en azından yıl ortasında hedeflerin sapmadığına işaret ediyor, ama çok yıllı isabet oranı hakkında hüküm veremem.</div>
+    </div>
+  </section>
+
+  <!-- ============ 8. COMPETITIVE LANDSCAPE ============ -->
+  <section id="s8">
+    <h2><span class="num">08</span>Competitive Landscape</h2>
+    <div class="table-scroll">
+    <table>
+      <caption>Doğrudan emsal karşılaştırması (Eylül 2026)</caption>
+      <thead><tr><th>Şirket</th><th>Piyasa değeri</th><th>F/K</th><th>İleri F/K</th><th>Gelir büyümesi</th><th>Net marj</th><th>Ana güç alanı</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dassault Systèmes</strong></td><td>€27,8 Mlyr</td><td>21,6</td><td>15,4</td><td class="neg">-1,7% (TTM)</td><td>21,3%</td><td>Üst-segment CAD/PLM, havacılık-savunma</td></tr>
+        <tr><td>PTC Inc.</td><td>$14,0 Mlyr</td><td>12,5</td><td>15,3</td><td class="pos">+19,2%</td><td>44,6%</td><td>PLM (Windchill), IoT, ARR verimliliği</td></tr>
+        <tr><td>Autodesk</td><td>$44,2 Mlyr</td><td>27,4</td><td>16,3</td><td class="pos">+17,9%</td><td>—</td><td>AEC/medya, bulut-native CAD (Fusion)</td></tr>
+        <tr><td>Siemens (+ Altair)</td><td colspan="5">Siemens AG'nin bir parçası — ayrı finansal veri bu oturumda doğrulanamadı. PLM'de (NX, Teamcenter, Solid Edge) ABI Research'e göre MCAD SaaS lideri; 2024'te Altair'i devralarak simülasyon/digital twin yeteneklerini genişletti.</td></tr>
+        <tr><td>Synopsys (+ Ansys)</td><td colspan="5">2025'te Ansys'i devralarak (kapandı) simülasyon pazarına genişledi; TAM'ini ~%63 artırarak $31 Mlyr'a çıkardığı belirtiliyor (kaynak: piyasa araştırma özeti, doğrulanamadı). SIMULIA'nın doğrudan rakibi haline geldi.</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p><strong>SAP / Oracle / Adobe:</strong> Bu şirketler DSY'nin doğrudan rakibi değil — SAP kurumsal ERP'de PLM'e komşu bir alanda (bazı büyük müşterilerde entegrasyon/rekabet noktası olabilir), Oracle veritabanı/bulut altyapısında, Adobe ise 3D içerik/yaratıcı araçlarda çok sınırlı bir kesişim taşıyor. Zorlama bir karşılaştırma yapmak yerine bu üçünü "çevresel, düşük doğrudan rekabet" olarak sınıflandırıyorum.</p>
+
+    <div class="table-scroll" style="margin-top:4px;">
+    <table>
+      <caption>Rekabet tablosunun okunması</caption>
+      <tbody>
+        <tr><td style="width:50%"><strong>PTC</strong> çok daha ucuz, çok daha hızlı büyüyor, çok daha yüksek marjla çalışıyor.</td><td>DSY'nin göreli değerlemesi bu emsale karşı savunulması en zor nokta.</td></tr>
+        <tr><td><strong>Autodesk</strong> benzer ileri F/K'da ama çok daha hızlı büyüyor.</td><td>Piyasa DSY'ye Autodesk'le aynı çarpanı veriyor ama Autodesk çok daha fazla büyüme sunuyor — bu bir uyarı işareti ya da DSY'nin marj/kalite primi olarak okunabilir.</td></tr>
+        <tr><td>Simülasyon pazarında <strong>iki büyük konsolidasyon</strong> (Synopsys+Ansys, Siemens+Altair) art arda gerçekleşti.</td><td>SIMULIA artık bağımsız değil, çok daha büyük, çeşitlendirilmiş rakiplerle karşı karşıya — rekabet yoğunluğu yapısal olarak arttı.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>Neden kazanabilir / neden kaybedebilir?</h3>
+    <div class="two-col">
+      <div class="card pos-b">
+        <h3>Kazanma senaryosu</h3>
+        <p style="font-size:13.5px; margin:0;">Havacılık/savunma/otomotiv üst segmentindeki derin entegrasyonu ve sertifikasyon avantajı, konsolide olan rakiplerin kısa-orta vadede kolayca kıramayacağı bir kale. AI-native platform geçişini erken ve etkili yaparsa (AURA/LEO/MARIE), hem üst segmentte hem KOBİ'de pazar payı savunabilir/genişletebilir.</p>
+      </div>
+      <div class="card neg-b">
+        <h3>Kaybetme senaryosu</h3>
+        <p style="font-size:13.5px; margin:0;">Synopsys+Ansys ve Siemens+Altair birleşmeleri, çapraz satış ve Ar-Ge bütçesi avantajı yaratarak SIMULIA'yı ve orta vadede diğer segmentleri sıkıştırabilir. PTC'nin çok daha yüksek büyüme/marj kombinasyonu sürerse, DSY'nin "kalite primi" anlatısı zayıflar ve göreli değerleme baskı altında kalabilir.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 9. AI ANALYSIS ============ -->
+  <section id="s9">
+    <h2><span class="num">09</span>AI Analysis</h2>
+    <p>Temmuz 2026'da şirket, 3DEXPERIENCE platformuna <strong>AURA, LEO ve MARIE</strong> adlı "agentic" AI companion'ları entegre ettiğini duyurdu — kullanıcılarla birlikte tasarım/mühendislik işlerinde "co-create" eden yapay zekâ ajanları. Bu, DSY'nin AI'ı bir özellik değil bir <strong>platform katmanı</strong> olarak konumlandırma stratejisinin somut ilk ürünü.</p>
+
+    <div class="two-col">
+      <div class="card pos-b">
+        <h3>🟢 Pozitif etkiler</h3>
+        <ul>
+          <li>Mühendislik iş akışlarında verimlilik artışı → müşteri elde tutma ve upsell potansiyeli</li>
+          <li>AI-native platforma erken geçiş, geç kalan rakiplere karşı zaman avantajı yaratabilir</li>
+          <li>ArisGlobal ile "unified AI intelligence platform" hedefi, yaşam bilimleri segmentini canlandırabilir</li>
+          <li>Yüksek marjlı yazılım işinde AI, insan Ar-Ge maliyetini göreceli olarak azaltabilir (operating leverage)</li>
+        </ul>
+      </div>
+      <div class="card neg-b">
+        <h3>🔴 Negatif / riskli etkiler</h3>
+        <ul>
+          <li><strong>Commoditization riski:</strong> Generative AI, temel CAD/tasarım işlevlerini basitleştirip düşük maliyetli/açık kaynak araçlarla rekabeti kolaylaştırabilir — özellikle KOBİ/SOLIDWORKS segmentinde orta-uzun vadede</li>
+          <li>AI özellikleri için ek ücretlendirme (pricing power artışı) ile "AI her yerde ücretsiz olmalı" beklentisi (pricing power baskısı) arasında net değil hangisinin baskın çıkacağı</li>
+          <li>Rakiplerin (Autodesk AI, Siemens Xcelerator AI, Synopsys.ai) kendi AI yatırımları hakkında bu oturumda detaylı/karşılaştırmalı veri bulunamadı — DSY'nin AI'da öncü mü yoksa takipçi mi olduğu net değil</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flag b">
+      <span class="emoji">🔵</span>
+      <div><span class="flag-label">Sonuç — net etki değerlendirmesi</span>AI, Dassault Systèmes için <strong>iki taraflı bir güç</strong>: kısa-orta vadede (1-3 yıl) muhtemelen net pozitif bir katalizör — mevcut derin müşteri entegrasyonu üzerine AI katmanı ekleyerek upsell/verimlilik hikâyesi anlatabilir. Uzun vadede (5+ yıl) ise CAD/mühendislik işlevlerinin commoditize olma riski gerçek ve şu an fiyatlanmayan bir kuyruk riski. AURA/LEO/MARIE henüz gelire yansımadığı için bu değerlendirme büyük ölçüde <strong>niteliksel bir yargı</strong>, sayısal kanıta dayanmıyor.</div>
+    </div>
+  </section>
+
+  <!-- ============ 10. INDUSTRY & MACRO ============ -->
+  <section id="s10">
+    <h2><span class="num">10</span>Industry &amp; Macro</h2>
+    <div class="two-col">
+      <div class="card">
+        <h3>Sektörel tema — pozitif</h3>
+        <ul>
+          <li><strong>Savunma harcamaları:</strong> Avrupa'da devam eden Rusya-Ukrayna savaşı (bkz. önceki raporumuz) ve artan savunma bütçeleri, CATIA'nın güçlü olduğu havacılık/savunma tasarım talebini destekleyen bir makro rüzgar.</li>
+          <li><strong>EV/otomotiv dönüşümü:</strong> JSW Greentech örneğinde görüldüğü gibi yeni EV üretim tesisleri DELMIA/3DEXPERIENCE talebi yaratıyor.</li>
+          <li><strong>Dijitalleşme/bulut geçişi:</strong> Sanayi şirketlerinin dijital ikiz (digital twin) yatırımları genel olarak büyüyen bir kategori.</li>
+        </ul>
+      </div>
+      <div class="card warn-b">
+        <h3>Sektörel tema — risk</h3>
+        <ul>
+          <li><strong>Yüksek faiz ortamı:</strong> Kurumsal IT bütçelerinde disiplin baskısı yaratmaya devam ediyor; yüksek çarpanlı yazılım hisseleri için iskonto oranı (WACC) baskısı.</li>
+          <li><strong>Ortadoğu/jeopolitik gerginlik ve IMF'nin küresel büyüme uyarıları</strong> (bkz. önceki raporumuz) — genel kurumsal capex iştahını aşağı çekebilir.</li>
+          <li><strong>Çin pazarı:</strong> Havacılık/savunma yazılımında ihracat kontrolü/jeopolitik hassasiyet potansiyel bir risk ama bu oturumda DSY'ye özel somut bir gelişme doğrulanamadı.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="flag y"><span class="emoji">🟡</span><div><span class="flag-label">Doğrulanamayan veri</span>CAD/PLM/simülasyon pazarının toplam büyüklüğü (TAM) ve büyüme oranı (CAGR) için güvenilir, güncel bir birincil kaynak bu oturumda bulunamadı — sektör raporları (Gartner, IDC, ABI Research gibi) genelde ücretli/erişilemez. Bu nedenle pazar büyüklüğü rakamı vermiyorum; bunun yerine niteliksel talep sürücülerine odaklandım.</div></div>
+  </section>
+
+  <!-- ============ 11. RISK MATRIX ============ -->
+  <section id="s11">
+    <h2><span class="num">11</span>Risk Matrix</h2>
+    <div class="table-scroll">
+    <table>
+      <caption>En az 10 önemli risk — olasılık/etki/yönetim/değerleme etkisi</caption>
+      <thead><tr><th>Risk</th><th>Olasılık</th><th>Etki</th><th>Şirket nasıl yönetebilir</th><th>Değerleme etkisi</th></tr></thead>
+      <tbody>
+        <tr><td>Gelir büyümesinin kalıcı olarak durgun kalması</td><td>Orta</td><td>Yüksek</td><td>AI monetizasyonu, fiyatlama modeli geçişi</td><td>Büyük — çoklu daralması (F/K 21x→PTC seviyesi 12x'e yakınsayabilir)</td></tr>
+        <tr><td>ArisGlobal entegrasyon başarısızlığı / life sciences toparlanamaması</td><td>Orta</td><td>Yüksek</td><td>Kademeli entegrasyon, mevcut Medidata altyapısına bağlama</td><td>Orta-Yüksek — şerefiye değer düşüklüğü riski (Bölüm 6)</td></tr>
+        <tr><td>Generative AI'ın CAD işlevlerini commoditize etmesi</td><td>Düşük-Orta (uzun vadeli)</td><td>Yüksek</td><td>AI'ı kendi platformuna erken entegre etmek (AURA/LEO/MARIE)</td><td>Uzun vadede yüksek, kısa vadede düşük</td></tr>
+        <tr><td>Rekabetin konsolidasyonla yoğunlaşması (Synopsys+Ansys, Siemens+Altair)</td><td>Yüksek (zaten gerçekleşti)</td><td>Orta</td><td>SIMULIA'ya odaklı yatırım, çapraz satış</td><td>Orta — pazar payı/fiyatlama baskısı</td></tr>
+        <tr><td>Şerefiye değer düşüklüğü (özellikle yaşam bilimleri CGU'sunda)</td><td>Düşük-Orta</td><td>Orta</td><td>Segment performansını yakından yönetmek</td><td>Orta — tek seferlik büyük muhasebe zararı olasılığı</td></tr>
+        <tr><td>Kur riski (EUR raporlama, küresel USD/CNY gelir)</td><td>Yüksek</td><td>Düşük-Orta</td><td>Doğal hedge (küresel maliyet tabanı)</td><td>Düşük-Orta — çeyreksel gelir volatilitesi</td></tr>
+        <tr><td>Endüstriyel capex döngüsünün yavaşlaması (otomotiv/havacılık kesintileri)</td><td>Orta</td><td>Orta-Yüksek</td><td>Sektör çeşitlendirmesi (savunma, yaşam bilimleri)</td><td>Orta</td></tr>
+        <tr><td>Liderlik geçişi riski (yeni CEO+Başkan birleşik rolü)</td><td>Düşük-Orta</td><td>Orta</td><td>Kurumsal yönetişim yapıları, GIMD gözetimi</td><td>Düşük-Orta</td></tr>
+        <tr><td><strong>SBC/buyback dinamiği nedeniyle görünen hissedar getirisinin şişirilmiş olması</strong></td><td>Yüksek (zaten gerçekleşiyor)</td><td>Orta</td><td>Net hisse azaltımını hızlandırmak</td><td>Orta — "gerçek" buyback getirisi başlık rakamından düşük</td></tr>
+        <tr><td>Çin/ihracat kontrolü jeopolitik riski (havacılık-savunma yazılımı hassasiyeti)</td><td>Orta (doğrulanamadı)</td><td>Orta</td><td>Bölgesel uyum stratejileri</td><td>Belirsiz — veri yetersiz</td></tr>
+        <tr><td>Siber güvenlik / bulut veri ihlali (OUTSCALE, müşteri IP'si)</td><td>Düşük-Orta</td><td>Yüksek (gerçekleşirse)</td><td>Güvenlik yatırımı, sertifikasyonlar</td><td>Yüksek ama düşük olasılık — kuyruk riski</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="flag r"><span class="emoji">🔴</span><div><span class="flag-label">İlk bakışta fark edilmeyebilecek en kritik iki risk</span>(1) Şerefiye/maddi olmayan varlık yükü (%46 of toplam varlıklar) + zayıflayan life sciences segmenti kombinasyonu — impairment riski gelir tablosunda henüz görünmüyor. (2) Buyback rakamlarının başlıkta güçlü görünüp net hisse sayısını neredeyse hiç değiştirmemesi — "hissedar dostu sermaye politikası" algısı ile gerçek matematik arasında fark var.</div></div>
+  </section>
+
+  <!-- ============ 12. BULL / BASE / BEAR ============ -->
+  <section id="s12">
+    <h2><span class="num">12</span>Bull / Base / Bear Senaryoları</h2>
+    <p class="section-lede">Varsayımlar benim tahminimdir, şirket kaynaklı değildir. Metodoloji ve tam DCF detayları için Bölüm 13'e bakın.</p>
+
+    <div class="table-scroll">
+    <table>
+      <caption>Senaryo varsayımları ve sonuçları</caption>
+      <thead><tr><th>Varsayım</th><th class="neg" style="text-align:right">🔴 Bear</th><th style="text-align:right">🟡 Base</th><th class="pos" style="text-align:right">🟢 Bull</th></tr></thead>
+      <tbody>
+        <tr><td>10 yıllık ort. gelir büyümesi</td><td>%2,5</td><td>%5,5</td><td>%8,0</td></tr>
+        <tr><td>Yıl-10 faaliyet marjı</td><td>%20,0</td><td>%26,0</td><td>%29,0</td></tr>
+        <tr><td>Vergi oranı (varsayım)</td><td>%25</td><td>%24</td><td>%23</td></tr>
+        <tr><td>FCF dönüşümü (FCF/NOPAT)</td><td>%110</td><td>%125</td><td>%130</td></tr>
+        <tr><td>WACC</td><td>%9,5</td><td>%8,5</td><td>%8,0</td></tr>
+        <tr><td>Terminal büyüme</td><td>%1,5</td><td>%2,5</td><td>%2,5</td></tr>
+        <tr class="hl"><td><strong>DCF Adil Değer / Hisse</strong></td><td class="neg"><strong>€12,12</strong></td><td><strong>€25,60</strong></td><td class="pos"><strong>€39,03</strong></td></tr>
+        <tr><td>Mevcut fiyata göre potansiyel</td><td class="neg">-%42,3</td><td class="pos">+%21,8</td><td class="pos">+%85,7</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="range-viz">
+      <div class="range-line">
+        <div class="range-pt" style="left:0%;"><div class="rp-label">🔴 Bear<b>€12,12</b></div></div>
+        <div class="range-pt current" style="left:22.6%;"><div class="rp-label">Mevcut<b>€21,02</b></div></div>
+        <div class="range-pt" style="left:31.3%;"><div class="rp-label">🟡 Base<b>€25,60</b></div></div>
+        <div class="range-pt" style="left:100%;"><div class="rp-label">🟢 Bull<b>€39,03</b></div></div>
+      </div>
+    </div>
+    <p style="margin-top:56px;">Mevcut fiyat, Bear-Bull aralığının alt %23'lük diliminde — yani mevcut fiyatlama, tarihsel büyüme oranlarının belirgin şekilde altında bir senaryoya daha yakın duruyor. Bu, ya piyasanın haklı olarak temkinli olduğu (büyüme gerçekten kalıcı olarak yavaşladı) ya da AI/ArisGlobal opsiyonelliğinin henüz fiyatlanmadığı anlamına gelebilir — ikisini ayırt etmek, önümüzdeki 2-4 çeyreklik organik büyüme verisini gerektirir.</p>
+  </section>
+
+  <!-- ============ 13. VALUATION ============ -->
+  <section id="s13">
+    <h2><span class="num">13</span>Valuation</h2>
+
+    <h3>A) DCF metodolojisi</h3>
+    <p>10 yıllık açık tahmin dönemi + Gordon Growth terminal değer. Her yıl için gelir, doğrusal olarak genişleyen/daralan faaliyet marjı, sabit vergi oranı ve FCF dönüşüm oranı (FCF/NOPAT — tarihsel olarak DSY'de bu oran %125-140 civarında seyrediyor çünkü geçmiş devralımlardan gelen maddi olmayan varlık itfası net kârı nakit akışının altına çekiyor) varsayıldı. İskonto oranı (WACC) ve terminal büyüme senaryoya göre değişti. Net nakit pozisyonu (€1.530M) doğrudan eklendi (net borç değil net nakit olduğu için). Diluted hisse sayısı: 1.320M.</p>
+
+    <div class="table-scroll">
+    <table>
+      <caption>DCF hesaplama detayı — Base senaryo</caption>
+      <tbody>
+        <tr><td>Başlangıç geliri (FY2025)</td><td style="text-align:right">€6.236M</td></tr>
+        <tr><td>Yıl-1 geliri (%5,5 büyüme)</td><td style="text-align:right">€6.579M</td></tr>
+        <tr><td>Yıl-10 geliri</td><td style="text-align:right">€10.652M</td></tr>
+        <tr><td>Yıl-10 FAVÖK marjı</td><td style="text-align:right">%26,0</td></tr>
+        <tr><td>Yıl-10 FCF</td><td style="text-align:right">€2.631M</td></tr>
+        <tr><td>PV(Yıl 1-10 FCF toplamı)</td><td style="text-align:right">€12.377M</td></tr>
+        <tr><td>PV(Terminal Değer)</td><td style="text-align:right">€19.879M</td></tr>
+        <tr><td>Firma Değeri (EV)</td><td style="text-align:right">€32.256M</td></tr>
+        <tr><td>+ Net nakit</td><td style="text-align:right">€1.530M</td></tr>
+        <tr class="hl"><td><strong>Özkaynak Değeri</strong></td><td style="text-align:right"><strong>€33.786M</strong></td></tr>
+        <tr class="hl"><td><strong>Hisse Başına Adil Değer</strong></td><td style="text-align:right"><strong>€25,60</strong></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3>B) Çarpan bazlı çapraz kontrol</h3>
+    <div class="stat-row">
+      <div class="stat"><div class="num">4,2x</div><div class="label">EV/Gelir (mevcut, EV≈€26,3 Mlyr)</div></div>
+      <div class="stat"><div class="num">21,6x</div><div class="label">F/K (trailing, IFRS EPS)</div></div>
+      <div class="stat"><div class="num">15,4x</div><div class="label">İleri F/K (stockanalysis)</div></div>
+      <div class="stat"><div class="num">%5,3</div><div class="label">FCF getirisi (FCF/piyasa değeri)</div></div>
+    </div>
+    <div class="flag y"><span class="emoji">🟡</span><div><span class="flag-label">Önemli nüans — IFRS vs non-IFRS EPS</span>İleri F/K'nın (15,4x) ima ettiği ileri EPS (~€1,37), TTM IFRS EPS'nin (€0,97) belirgin üzerinde. Bu muhtemelen analist konsensüsünün DSY'nin kendi raporladığı <strong>non-IFRS (ayarlanmış) EPS</strong>'ye dayanmasından kaynaklanıyor — DSY tarihsel olarak SBC ve devralım itfalarını geri ekleyerek non-IFRS kâr rakamları raporluyor, bu genelde IFRS'den belirgin yüksek çıkar. <strong>Bu iki EPS tanımını karıştırmamak kritik</strong> — ben bu farkı birincil kaynaktan (şirketin non-IFRS mutabakat tablosu) doğrulayamadım, bu yüzden F/K çarpanlarını yorumlarken temkinli olun.</div></div>
+
+    <h3>C) Tersine mühendislik — piyasa ne fiyatlıyor?</h3>
+    <div class="critical-box">
+      <div class="cb-label">🎯 Yatırımcı İçin Kritik</div>
+      <p>Base senaryonun diğer tüm varsayımlarını (marj %26'ya genişliyor, WACC %8,5, terminal büyüme %2,5) sabit tutup yalnızca büyüme oranını mevcut fiyata (€21,02) eşitleyecek şekilde çözdüğümde: piyasa şu anda yaklaşık <strong>%2,8 gibi bir 10 yıllık ortalama gelir büyümesi</strong> fiyatlıyor. Marj genişlemesini de sıfırlayıp sabit %22,4'te tutarsam, ima edilen büyüme <strong>%4,4</strong>'e çıkıyor — şirketin kendi 2026 rehberinin (%3-5) alt-orta bandına çok yakın. <strong>Sonuç: piyasa, DSY'nin mevcut mütevazı guidance'ının gerçekleşmesini fiyatlıyor, bir toparlanma/AI sürprizi fiyatlamıyor.</strong> Bu hem aşağı riskin sınırlı olduğuna hem de yukarı sürprizin ödüllendirilebileceğine işaret eden, tezin en güçlü sayısal dayanağı.</p>
+    </div>
+
+    <h3>Adil değer özeti</h3>
+    <div class="stat-row">
+      <div class="stat"><div class="num neg">€12,12</div><div class="label">Bear Fair Value</div></div>
+      <div class="stat"><div class="num">€25,60</div><div class="label">Base Fair Value</div></div>
+      <div class="stat"><div class="num pos">€39,03</div><div class="label">Bull Fair Value</div></div>
+      <div class="stat"><div class="num" style="color:var(--gold)">€21,02</div><div class="label">Mevcut Fiyat</div></div>
+    </div>
+  </section>
+
+  <!-- ============ 14. KEY METRICS ============ -->
+  <section id="s14">
+    <h2><span class="num">14</span>Key Metrics to Track — Her Çeyrek İzlenecek 5 Gösterge</h2>
+    <ol class="plain">
+      <li><strong>Organik gelir büyümesi (çeyreksel, YoY):</strong> TTM'nin negatife döndüğü bu ortamda, pozitife dönüş tezin ilk ve en önemli doğrulaması olur.</li>
+      <li><strong>Yaşam bilimleri segment büyümesi + ArisGlobal entegrasyon güncellemeleri:</strong> Kapanış tarihi, entegrasyon maliyetleri, segment gelirinin dönüş noktası.</li>
+      <li><strong>Faaliyet marjı trendi (hem IFRS hem şirketin kendi non-IFRS rakamı):</strong> Operating leverage gerçekleşiyor mu, yoksa AI yatırımları marjı mı aşındırıyor?</li>
+      <li><strong>Net hisse sayısı değişimi:</strong> Buyback'in SBC'yi gerçekten aşıp aşmadığının somut kanıtı (Bölüm 7'deki kritik bulgu).</li>
+      <li><strong>Guidance revizyonları (yıl içi):</strong> Yukarı mı aşağı mı revize ediliyor — yönetimin öngörü kalitesinin göstergesi.</li>
+    </ol>
+    <p style="font-size:13px; color:var(--ink-soft);">Bonus izlenecek: recurring/subscription gelir oranı ve net revenue retention açıklanırsa (şu an raporlanmıyor gibi görünüyor) — bu, abonelik geçişinin gerçek ilerlemesini gösterir.</p>
+  </section>
+
+  <!-- ============ 15. RED FLAGS ============ -->
+  <section id="s15">
+    <h2><span class="num">15</span>Red Flags — Tezi Bozacak Gelişmeler</h2>
+    <div class="flag r"><span class="emoji">🔴</span><div>
+      <ul class="plain" style="margin:0;">
+        <li>Organik gelirin ardışık 2+ çeyrek boyunca negatif kalması (tek çeyreklik dalgalanma değil, kalıcı düşüş)</li>
+        <li>ArisGlobal entegrasyonunda beklenmedik maliyet aşımı veya life sciences segmentinde şerefiye değer düşüklüğü açıklanması</li>
+        <li>2026 yıl-sonu guidance'ının (mevcut %3-5 gelir / %3-6 EPS) aşağı yönlü revize edilmesi</li>
+        <li>Büyük bir OEM müşterisinin (havacılık/otomotiv) rakibe geçtiğinin haber olması — geçiş maliyeti hendeğinin kırıldığına dair somut kanıt</li>
+        <li>CFO veya başka bir kilit yöneticinin beklenmedik şekilde ayrılması (liderlik geçişi zaten hassas bir dönemde)</li>
+        <li>Hisse bazlı ödemenin (SBC) hızla artması ve net hisse sayısının fiilen artmaya başlaması</li>
+        <li>Rakiplerden (Synopsys+Ansys, Siemens+Altair) somut pazar payı kaybına işaret eden büyük müşteri kayıpları haberleri</li>
+      </ul>
+    </div></div>
+  </section>
+
+  <!-- ============ 16. CATALYSTS ============ -->
+  <section id="s16">
+    <h2><span class="num">16</span>Catalysts — Tezi Güçlendirecek Gelişmeler</h2>
+    <div class="flag b"><span class="emoji">🔵</span><div>
+      <ul class="plain" style="margin:0;">
+        <li>Organik gelir büyümesinin guidance üst bandının (%5) üzerine çıkması ve pozitif TTM büyümeye dönüş</li>
+        <li>AURA/LEO/MARIE AI companion'larının somut gelir/upsell katkısının çeyrek raporlarda ayrı kalem olarak raporlanmaya başlaması</li>
+        <li>ArisGlobal'ın planlanandan hızlı kapanması ve life sciences segmentinin pozitif büyümeye dönmesi</li>
+        <li>Avrupa savunma harcamalarındaki artışın (bkz. önceki jeopolitik raporumuz) somut büyük CATIA/havacılık kontratlarına dönüşmesi</li>
+        <li>Faaliyet marjının guidance'ın üzerinde genişlemesi — operating leverage'ın kanıtlanması</li>
+        <li>2026 guidance'ının yıl içinde yukarı revize edilmesi</li>
+        <li>Net hisse sayısında gerçek ve sürekli bir azalış trendinin başlaması</li>
+      </ul>
+    </div></div>
+  </section>
+
+  <!-- ============ 17. FINAL VERDICT ============ -->
+  <section id="s17">
+    <h2><span class="num">17</span>Final Verdict — Yatırım Tezinin Özeti</h2>
+
+    <div class="two-col">
+      <div class="card pos-b">
+        <h3>🟢 Neden alınır — en güçlü nedenler</h3>
+        <ul>
+          <li>Havacılık/savunma/otomotiv üst segmentinde kırılması çok zor bir hendek ve geçiş maliyeti</li>
+          <li>Net nakit pozisyonunda (€1,53 Mlyr), güçlü FCF üretimi (~%24 marj), sağlıklı bilanço trendleri</li>
+          <li>ROIC'in %10,5'ten %18,5'e çıkması — büyüme dururken bile sermaye verimliliğinin ciddi şekilde iyileşmesi</li>
+          <li>%31'lik düşüş sonrası ileri F/K artık tarihsel prim seviyesinde değil, emsal ortalamasına yakın</li>
+          <li>Piyasanın mevcut fiyatta yalnızca ~%2,8-4,4 büyüme fiyatladığı (reverse-DCF bulgusu) — düşük beklenti çıtası, sürpriz payı yaratır</li>
+          <li>AI-native platform (AURA/LEO/MARIE) ve ArisGlobal ile iki potansiyel büyüme motoru henüz erken evrede ve fiyatlanmamış</li>
+          <li>Analist konsensüsü "Al" (20 analist, ortalama hedef €23,71)</li>
+        </ul>
+      </div>
+      <div class="card neg-b">
+        <h3>🔴 Neden alınmaz — en güçlü nedenler</h3>
+        <ul>
+          <li>TTM organik büyüme negatif (-%1,7) — "büyüme hikâyesi" şu anda sayılarla desteklenmiyor</li>
+          <li>PTC, çok daha ucuz (F/K 12,5) ve çok daha hızlı büyüyerek (+%19) doğrudan bir fırsat maliyeti yaratıyor</li>
+          <li>Yaşam bilimleri segmenti zayıf; ArisGlobal devralımı henüz kapanmadı, entegrasyon riski kanıtlanmamış bir bahis</li>
+          <li>Şerefiye + maddi olmayan varlıklar toplam varlıkların ~%46'sı — impairment riski gerçek ve gelecekte tek seferlik zarar yaratabilir</li>
+          <li>Buyback'lerin büyük kısmı SBC dilüsyonunu dengeliyor, gerçek hissedar getirisi başlık rakamından zayıf</li>
+          <li>Simülasyon pazarında iki büyük konsolidasyon (Synopsys+Ansys, Siemens+Altair) rekabeti yapısal olarak yoğunlaştırdı</li>
+          <li>Yeni ve test edilmemiş liderlik yapısı (CEO+Başkan birleşik rol), 43 yıllık bir dönemin hemen ardından</li>
+          <li>Segment/bölge bazlı gelir kırılımı, guidance geçmişi gibi kritik veriler bu analizde doğrulanamadı — şeffaflık/veri erişimi sınırlı</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Skor kartı (11 boyut / 100)</h3>
+    <div class="score-grid">
+      <div class="score-item"><div class="si-top"><span>Business Quality</span><b>82</b></div><div class="score-bar"><span style="width:82%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Moat</span><b>85</b></div><div class="score-bar"><span style="width:85%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Growth</span><b>45</b></div><div class="score-bar"><span style="width:45%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Profitability</span><b>80</b></div><div class="score-bar"><span style="width:80%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Balance Sheet</span><b>88</b></div><div class="score-bar"><span style="width:88%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Management</span><b>65</b></div><div class="score-bar"><span style="width:65%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Capital Allocation</span><b>60</b></div><div class="score-bar"><span style="width:60%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Valuation</span><b>68</b></div><div class="score-bar"><span style="width:68%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>AI Positioning</span><b>62</b></div><div class="score-bar"><span style="width:62%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Competitive Position</span><b>72</b></div><div class="score-bar"><span style="width:72%"></span></div></div>
+      <div class="score-item"><div class="si-top"><span>Risk / Reward</span><b>65</b></div><div class="score-bar"><span style="width:65%"></span></div></div>
+    </div>
+    <p style="text-align:center; margin-top:8px;"><span class="score-badge">Ortalama / Genel Skor <b>70</b>/100</span></p>
+
+    <h3>Fiyat bantları — ne zaman cazip, ne zaman pahalı</h3>
+    <div class="table-scroll">
+    <table>
+      <tbody>
+        <tr><td style="width:22%"><strong>€12 - €16</strong></td><td>Bear senaryoya yakın — margin of safety yüksek, ama yalnızca büyüme/marj tezinin belirgin şekilde bozulduğu bir ortamda bu seviyelere inilir</td></tr>
+        <tr><td><strong>€17 - €23</strong></td><td>Makul/cazip bölge — mevcut fiyat (€21,02) burada; Base senaryonun altında, riskleri makul şekilde fiyatlıyor</td></tr>
+        <tr><td><strong>€24 - €30</strong></td><td>Adil değer - hafif prim bölgesi — Base senaryonun gerçekleştiğini varsayan bir fiyatlama; büyümenin fiilen toparlandığının teyidini gerektirir</td></tr>
+        <tr><td><strong>€30+</strong></td><td>Pahalı bölge — Bull senaryonun (AI+ArisGlobal'in tam başarısı) önemli ölçüde fiyatlanmasını gerektirir; bu seviyede risk/getiri dengesi bozulur</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p><strong>Sonuç:</strong> Dassault Systèmes, yüksek kaliteli bir hendeğe sahip ama şu anda büyüme krizi yaşayan bir şirket. Mevcut fiyat (€21,02), piyasanın iyimser olmayan (guidance'ın alt-orta bandını fiyatlayan) bir senaryo varsaydığını gösteriyor — bu hem sınırlı aşağı risk hem de kanıtlanmamış bir yukarı opsiyonellik (AI, ArisGlobal) anlamına geliyor. Bu bir "net kesin al" veya "net kesin sat" hikâyesi değil; <strong>sonraki 2-4 çeyreklik organik büyüme ve marj verisi, tezin hangi yöne kırılacağını belirleyecek</strong>. €17-23 bandı mevcut bilgiyle makul bir giriş aralığı olarak değerlendirilebilir; €30 üzerinde risk/getiri dengesinin bozulduğunu düşünüyorum.</p>
+  </section>
+
+  <!-- ============ 18. SOURCES ============ -->
+  <section id="s18">
+    <h2><span class="num">18</span>Sources</h2>
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>#</th><th>Kaynak</th><th>Kullanım alanı</th><th>Erişim tarihi</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><a href="https://stockanalysis.com/quote/epa/DSY/" target="_blank" rel="noopener">stockanalysis.com — DSY Genel Bakış</a></td><td>Fiyat, piyasa değeri, F/K, temettü, analist hedefi</td><td>11 Eyl 2026</td></tr>
+        <tr><td>2</td><td><a href="https://stockanalysis.com/quote/epa/DSY/financials/" target="_blank" rel="noopener">stockanalysis.com — Gelir Tablosu</a></td><td>5 yıllık gelir/kâr/marj verisi</td><td>11 Eyl 2026</td></tr>
+        <tr><td>3</td><td><a href="https://stockanalysis.com/quote/epa/DSY/financials/balance-sheet/" target="_blank" rel="noopener">stockanalysis.com — Bilanço</a></td><td>Varlık/yükümlülük/nakit/borç/şerefiye verisi</td><td>11 Eyl 2026</td></tr>
+        <tr><td>4</td><td><a href="https://stockanalysis.com/quote/epa/DSY/financials/cash-flow-statement/" target="_blank" rel="noopener">stockanalysis.com — Nakit Akışı</a></td><td>FCF, capex, SBC, temettü, buyback, M&amp;A</td><td>11 Eyl 2026</td></tr>
+        <tr><td>5</td><td><a href="https://stockanalysis.com/quote/epa/DSY/financials/ratios/" target="_blank" rel="noopener">stockanalysis.com — Oranlar</a></td><td>ROE, ROA, ROIC, likidite, kaldıraç</td><td>11 Eyl 2026</td></tr>
+        <tr><td>6</td><td><a href="https://stockanalysis.com/quote/epa/DSY/statistics/" target="_blank" rel="noopener">stockanalysis.com — İstatistikler</a></td><td>Hisse sayısı, sahiplik yapısı</td><td>11 Eyl 2026</td></tr>
+        <tr><td>7</td><td><a href="https://stockanalysis.com/stocks/PTC/" target="_blank" rel="noopener">stockanalysis.com — PTC Inc.</a></td><td>Emsal karşılaştırma verisi</td><td>11 Eyl 2026</td></tr>
+        <tr><td>8</td><td><a href="https://stockanalysis.com/stocks/ADSK/" target="_blank" rel="noopener">stockanalysis.com — Autodesk</a></td><td>Emsal karşılaştırma verisi</td><td>11 Eyl 2026</td></tr>
+        <tr><td>9</td><td><a href="https://en.wikipedia.org/wiki/Dassault_Syst%C3%A8mes" target="_blank" rel="noopener">Wikipedia — Dassault Systèmes</a></td><td>Şirket tarihi, segmentler, liderlik, sahiplik</td><td>11 Eyl 2026</td></tr>
+        <tr><td>10</td><td><a href="https://www.bing.com/news/search?q=Dassault+Systemes+news" target="_blank" rel="noopener">Bing News — "Dassault Systemes news"</a></td><td>Güncel haber akışı (Reuters, Morningstar, DATAQUEST, Business Wire)</td><td>11 Eyl 2026</td></tr>
+        <tr><td>11</td><td><a href="https://www.bing.com/news/search?q=Dassault+Systemes+stock+analysis+2026" target="_blank" rel="noopener">Bing News — Hisse analizi 2026</a></td><td>Q2 2026 sonuçları, ArisGlobal, segment performansı</td><td>11 Eyl 2026</td></tr>
+        <tr><td>12</td><td><a href="https://www.bing.com/news/search?q=Dassault+Systemes+PTC+Autodesk+Siemens+PLM+competition+market+share" target="_blank" rel="noopener">Bing News — Rekabet ortamı</a></td><td>ABI Research PLM/MCAD SaaS değerlendirmeleri</td><td>11 Eyl 2026</td></tr>
+        <tr><td>13</td><td><a href="https://www.bing.com/news/search?q=Synopsys+Ansys+acquisition+close+2025+Dassault+Siemens+simulation+market" target="_blank" rel="noopener">Bing News — Synopsys-Ansys / Siemens-Altair</a></td><td>Simülasyon pazarı konsolidasyonu</td><td>11 Eyl 2026</td></tr>
+        <tr><td>14</td><td><a href="https://www.bing.com/news/search?q=Dassault+Systemes+3DEXPERIENCE+AI+companion+generative+AI+partnership+NVIDIA" target="_blank" rel="noopener">Bing News — AI companion (AURA/LEO/MARIE)</a></td><td>AI stratejisi ve ürün duyurusu</td><td>11 Eyl 2026</td></tr>
+        <tr><td>15</td><td><a href="https://www.bing.com/news/search?q=ArisGlobal+Dassault+Systemes+acquisition+details" target="_blank" rel="noopener">Bing News — ArisGlobal devralımı</a></td><td>Devralım detayları, fiyat, strateji</td><td>11 Eyl 2026</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <footer>
+      <p class="final-note">Bu belge otomatik olarak derlenmiş bir equity research taslağıdır; birincil kaynak (şirketin resmi 20-F/Document d'Enregistrement Universel, AMF dosyaları, yatırımcı sunumları) ile tam olarak teyit edilmemiştir. DCF ve senaryo değerlemeleri yazarın (Claude) kendi varsayımlarına dayanır, şirket veya analist tahmini değildir. Bu bir yatırım tavsiyesi değildir. Yatırım kararı vermeden önce şirketin resmi kaynaklarını ve bir profesyonel finansal danışmanı mutlaka değerlendirin.</p>
+      <p style="margin-top:10px;">Rapor tarihi: 11 Eylül 2026 · Hazırlayan: Claude (Cowork)</p>
+    </footer>
+  </section>
+
+</div>
+</body>
+</html>

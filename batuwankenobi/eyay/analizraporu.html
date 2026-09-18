@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dassault Systèmes — Temel Analiz Raporu</title>
+<style>
+  :root{
+    --bg:#f7f8fa;
+    --paper:#ffffff;
+    --ink:#161a22;
+    --ink-soft:#565f6e;
+    --line:#e2e5eb;
+    --navy:#0d2b4e;
+    --navy-soft:#e6edf5;
+    --gold:#a9791f;
+    --gold-soft:#f6efdd;
+    --green:#1e6b4f;
+    --green-soft:#e3f0e9;
+    --red:#a3311c;
+    --red-soft:#fbe8e3;
+    --serif: Georgia, 'Times New Roman', 'Noto Serif', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.6;
+    padding:0 16px;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:44px 0 80px;}
+
+  header.title{
+    border-bottom:3px solid var(--navy);
+    padding-bottom:22px;
+    margin-bottom:8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .title-main{flex:1; min-width:260px;}
+  .kicker{
+    font-size:12.5px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--gold); font-weight:700; margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--serif); font-size:clamp(26px,4.6vw,38px);
+    line-height:1.15; margin:0 0 10px; font-weight:700; color:var(--navy);
+  }
+  .subtitle{color:var(--ink-soft); font-size:15.5px; max-width:56ch;}
+  .ticker-box{
+    text-align:right;
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .ticker-box .px{
+    font-family:var(--serif);
+    font-size:26px;
+    font-weight:700;
+    color:var(--navy);
+  }
+  .ticker-box .chg{color:var(--red); font-weight:700;}
+
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:8px 22px;
+    margin-top:16px; font-size:13px; color:var(--ink-soft);
+  }
+  .meta-row strong{color:var(--ink);}
+
+  .disclaimer{
+    margin:26px 0 40px; padding:16px 18px;
+    background:var(--gold-soft); border:1px solid #e5d3a0;
+    border-radius:10px; font-size:14px; color:#5c4712;
+  }
+  .disclaimer strong{display:block; margin-bottom:4px; color:var(--gold);}
+
+  section{margin-bottom:46px;}
+  section > h2{
+    font-family:var(--serif); font-size:22px;
+    margin:0 0 18px; padding-bottom:10px;
+    border-bottom:1px solid var(--line); color:var(--navy);
+  }
+  section > .section-note{color:var(--ink-soft); font-size:13.5px; margin-top:-12px; margin-bottom:18px;}
+
+  p{margin:0 0 14px;}
+
+  .stat-row{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px; margin:0 0 22px;
+  }
+  .stat{
+    background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:14px 16px;
+  }
+  .stat .num{font-family:var(--serif); font-size:23px; font-weight:700; color:var(--navy); line-height:1.15;}
+  .stat .num.down{color:var(--red);}
+  .stat .num.up{color:var(--green);}
+  .stat .label{font-size:12px; color:var(--ink-soft); margin-top:4px;}
+
+  table{width:100%; border-collapse:collapse; margin:0 0 20px; font-size:13.5px; background:var(--paper); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+  caption{text-align:left; font-size:12px; color:var(--ink-soft); margin-bottom:8px; caption-side:top;}
+  th,td{padding:9px 12px; text-align:right; border-bottom:1px solid var(--line);}
+  th:first-child, td:first-child{text-align:left; color:var(--ink);}
+  thead th{background:var(--navy-soft); color:var(--navy); font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:0.03em;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.pos{color:var(--green); font-weight:600;}
+  td.neg{color:var(--red); font-weight:600;}
+  .table-scroll{overflow-x:auto;}
+
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:620px){.two-col{grid-template-columns:1fr;}}
+
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:16px 18px;}
+  .card h3{margin:0 0 8px; font-size:14.5px; color:var(--navy);}
+  .card.pos{border-left:4px solid var(--green);}
+  .card.neg{border-left:4px solid var(--red);}
+  .card ul{margin:0; padding-left:18px; font-size:13.5px;}
+  .card ul li{margin-bottom:6px;}
+
+  .callout{border-radius:10px; padding:16px 18px; margin:18px 0; font-size:14px; border:1px solid var(--line); background:var(--navy-soft); border-color:#c7d5e8;}
+  .callout .callout-label{font-weight:700; font-size:11.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--navy); margin-bottom:6px; display:block;}
+
+  .keypoints{
+    background:var(--paper); border:1.5px solid var(--navy); border-radius:12px; padding:6px 0;
+  }
+  .kp-item{
+    display:flex; gap:14px; padding:14px 20px;
+    border-bottom:1px solid var(--line);
+  }
+  .kp-item:last-child{border-bottom:none;}
+  .kp-num{
+    font-family:var(--serif); font-weight:700; font-size:18px; color:var(--gold); flex:none; width:26px;
+  }
+  .kp-text strong{color:var(--navy);}
+  .kp-text{font-size:14.5px;}
+
+  footer{margin-top:60px; padding-top:22px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-soft);}
+  footer h3{font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink); margin:0 0 10px;}
+  footer ol{padding-left:18px; margin:0 0 18px;}
+  footer ol li{margin-bottom:5px;}
+  footer .final-note{font-style:italic;}
+
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#12151b; --paper:#1a1f28; --ink:#eef0f4; --ink-soft:#a3acbc;
+      --line:#2c333f; --navy:#7fa8d6; --navy-soft:#1c2634; --gold:#d9ac5c; --gold-soft:#332a15;
+      --green:#7fd1b3; --green-soft:#1a2b24; --red:#e2897a; --red-soft:#2f1b17;
+    }
+    .disclaimer{color:#f0e0be; border-color:#5c4712;}
+    thead th{color:var(--navy);}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title">
+    <div class="title-main">
+      <div class="kicker">Temel Analiz · Şirket Raporu</div>
+      <h1>Dassault Systèmes SE</h1>
+      <p class="subtitle">CAD / PLM / simülasyon yazılımlarında küresel lider — endüstriyel çekirdek iş toparlanırken büyüme ivmesi genel olarak yavaşlıyor, yaşam bilimleri kolu AI odaklı devralımla yeniden konumlandırılıyor.</p>
+    </div>
+    <div class="ticker-box">
+      EPA: DSY · OTC: DASTY<br>
+      <span class="px">€21,02</span><br>
+      <span class="chg">52 haftalık zirveden ~%31 aşağı</span>
+    </div>
+    <div class="meta-row" style="width:100%;">
+      <span><strong>Tarih:</strong> 11 Eylül 2026</span>
+      <span><strong>Sektör:</strong> Kurumsal yazılım / Endüstriyel yazılım (CAD-PLM-Simülasyon)</span>
+      <span><strong>Merkez:</strong> Vélizy-Villacoublay, Fransa</span>
+      <span><strong>Hazırlayan:</strong> Claude (Cowork)</span>
+    </div>
+  </header>
+
+  <div class="disclaimer">
+    <strong>Önemli not — yatırım tavsiyesi değildir</strong>
+    Bu rapor, bu oturumda canlı arama aracının çalışmamasından ötürü Bing arama/haber sayfaları, stockanalysis.com ve Wikipedia üzerinden tek tek çekilen (WebFetch) verilere dayanıyor; birincil kaynak (şirketin resmi çeyrek raporu, 20-F/faaliyet raporu) ile teyit edilmedi. Ben bir finansal danışman değilim; bu belge yalnızca bilgilendirme amaçlıdır, alım/satım tavsiyesi değildir. Yatırım kararı vermeden önce güncel resmi kaynakları ve bir profesyonele danışmayı değerlendirin.
+  </div>
+
+  <section>
+    <h2>1. Şirkete Genel Bakış</h2>
+    <p>1981'de Dassault Group'tan ayrılarak kurulan Dassault Systèmes, havacılık endüstrisinin ihtiyaçlarından doğan CATIA tasarım yazılımıyla büyüdü — bugün dünyadaki yeni uçakların ~%70'i ve yeni otomobillerin ~%40'ı bu yazılımla tasarlanıyor (Boeing 777, Rafale gibi örnekler dahil). Şirket 1996'dan beri hem Paris Borsası'nda hem Nasdaq'ta işlem görüyor.</p>
+    <p>İş modeli, 2012'de lanse edilen <strong>3DEXPERIENCE</strong> platformu altında birleşen marka portföyüne dayanıyor:</p>
+    <div class="two-col">
+      <div class="card">
+        <h3>Endüstriyel çekirdek</h3>
+        <ul>
+          <li><strong>CATIA</strong> — üst segment CAD tasarım</li>
+          <li><strong>SOLIDWORKS</strong> — orta segment / KOBİ CAD</li>
+          <li><strong>ENOVIA</strong> — ürün yaşam döngüsü yönetimi (PLM)</li>
+          <li><strong>DELMIA</strong> — üretim operasyonları / dijital fabrika</li>
+          <li><strong>SIMULIA</strong> — mühendislik simülasyonu</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Yaşam bilimleri &amp; diğer</h3>
+        <ul>
+          <li><strong>MEDIDATA</strong> — klinik deneme yönetimi (2019 devralımı)</li>
+          <li><strong>BIOVIA</strong> — bilimsel modelleme</li>
+          <li><strong>OUTSCALE</strong> — Avrupa egemen bulut altyapısı</li>
+          <li><strong>3DEXCITE, GEOVIA, NETVIBES</strong> — sektörel çözümler</li>
+        </ul>
+      </div>
+    </div>
+    <p>Sahiplik yapısı kurucu aile kontrolünde: <strong>Groupe Industriel Marcel Dassault %39,91</strong>, halka açık kısım %49,38. CEO ve yönetim kurulu başkanı <strong>Pascal Daloz</strong>, 43 yıl görev yapan Bernard Charlès'in 2024 başında çekilmesiyle göreve geldi ve 5 ay önce başkanlık görevini de üstlendi — şirket bir liderlik geçiş döneminde.</p>
+  </section>
+
+  <section>
+    <h2>2. Finansal Performans</h2>
+    <p class="section-note">Kaynak: stockanalysis.com (EPA:DSY), TTM ve FY2022–2025 verileri</p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="num down">€21,02</div><div class="label">Güncel hisse fiyatı</div></div>
+      <div class="stat"><div class="num down">€27,83 Mlyr</div><div class="label">Piyasa değeri (-%20,7)</div></div>
+      <div class="stat"><div class="num">21,60</div><div class="label">F/K oranı (cari)</div></div>
+      <div class="stat"><div class="num up">15,36</div><div class="label">İleriye dönük F/K</div></div>
+    </div>
+
+    <div class="table-scroll">
+    <table>
+      <caption>Gelir tablosu özeti (milyon €)</caption>
+      <thead>
+        <tr><th>Metrik</th><th>TTM</th><th>FY2025</th><th>FY2024</th><th>FY2023</th><th>FY2022</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Gelir</td><td>6.206</td><td>6.236</td><td>6.214</td><td>5.951</td><td>5.665</td></tr>
+        <tr><td>Brüt kâr</td><td>5.228</td><td>5.221</td><td>5.197</td><td>4.980</td><td>4.746</td></tr>
+        <tr><td>Faaliyet kârı</td><td>1.554</td><td>1.395</td><td>1.376</td><td>1.290</td><td>1.319</td></tr>
+        <tr><td>Net kâr</td><td>1.324</td><td>1.196</td><td>1.200</td><td>1.051</td><td>932</td></tr>
+        <tr><td>Gelir büyümesi</td><td class="neg">-%1,69</td><td class="pos">+%0,36</td><td class="pos">+%4,41</td><td class="pos">+%5,05</td><td class="pos">+%16,57</td></tr>
+        <tr><td>Net kâr marjı</td><td>%21,33</td><td>%19,18</td><td>%19,32</td><td>%17,66</td><td>%16,44</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="callout">
+      <span class="callout-label">Okuma</span>
+      Tablo net bir hikâye anlatıyor: gelir büyümesi 2022'deki %16,6'dan 2025'te %0,36'ya, TTM'de ise eksiye (-%1,7) düşmüş — yani büyüme fiilen durmuş durumda. Buna karşın net kâr marjı aynı dönemde %16,4'ten %21,3'e yükselmiş. Bu, şirketin büyümeden çok <strong>maliyet disiplini ve portföy karması (yüksek marjlı abonelik gelirine kayış)</strong> üzerinden kârlılığını koruduğunu gösteriyor — sağlıklı ama "büyüme hikâyesi" değil, "verimlilik hikâyesi".
+    </div>
+
+    <p><strong>2026 yıl sonu rehberi:</strong> Şirket %3-5 gelir büyümesi ve %3-6 EPS büyümesi öngörüyor — kendisi de hızlı bir toparlanma vaat etmiyor. Temettü getirisi mütevazı: %1,20.</p>
+  </section>
+
+  <section>
+    <h2>3. Değerleme ve Rekabet Ortamı</h2>
+    <div class="table-scroll">
+    <table>
+      <caption>Emsal karşılaştırması (Eylül 2026 itibarıyla)</caption>
+      <thead>
+        <tr><th>Şirket</th><th>Piyasa değeri</th><th>F/K</th><th>İleriye F/K</th><th>Gelir büyümesi</th><th>Net marj</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Dassault Systèmes (DSY)</td><td>€27,8 Mlyr</td><td>21,6</td><td>15,4</td><td class="neg">-%1,7 (TTM)</td><td>%21,3</td></tr>
+        <tr><td>PTC Inc.</td><td>$14,0 Mlyr</td><td>12,5</td><td>15,3</td><td class="pos">+%19,2</td><td>%44,6</td></tr>
+        <tr><td>Autodesk (ADSK)</td><td>$44,2 Mlyr</td><td>27,4</td><td>16,3</td><td class="pos">+%17,9</td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <p>ABI Research'ün PLM değerlendirmesinde Siemens, PTC ve Dassault Systèmes sektör lideri olarak sınıflandırılıyor; MCAD SaaS tarafında ise Siemens (Solid Edge, NX) birinci sırada gösteriliyor. Rekabet tablosu şunu ortaya koyuyor: <strong>PTC hem çok daha ucuz (F/K 12,5) hem çok daha hızlı büyüyor (+%19) hem de çok daha yüksek marjla çalışıyor (%44,6)</strong> — Dassault'un mevcut fiyatlaması, büyüme durgunluğuna rağmen emsallerine göre "ucuz değil, ama ileriye dönük F/K'da makul" bir noktada duruyor. Autodesk de benzer bir ileriye dönük çarpanla (16,3) işlem görüyor ve daha güçlü büyüyor.</p>
+    <p>20 analistin konsensüsü "Al" yönünde, ortalama hedef fiyat €23,71 (~%12,8 yukarı potansiyel) — iyimser ama coşkulu değil, "toparlanma bekleniyor ama temkinli" bir duruş.</p>
+  </section>
+
+  <section>
+    <h2>4. Güncel Gelişmeler, Fırsatlar ve Riskler</h2>
+    <div class="two-col">
+      <div class="card pos">
+        <h3>Fırsatlar / olumlu sinyaller</h3>
+        <ul>
+          <li>Endüstriyel segment (çekirdek iş) toparlanma sinyali veriyor, marjlar iyileşiyor</li>
+          <li>3DEXPERIENCE platformunun "AI-native" hale getirilmesi — AI'ı gelir kalemine çevirme çabası</li>
+          <li>JSW Greentech (EV üretim tesisi), SOLIZE Partners gibi yeni büyük müşteri/partner anlaşmaları</li>
+          <li>Güçlü brüt marj (%84+) ve net marj genişlemesi, sağlam nakit üretme kapasitesine işaret ediyor</li>
+          <li>2050 net-sıfır hedefi SBTi onaylı — kurumsal yönetişim/ESG profili güçlü</li>
+        </ul>
+      </div>
+      <div class="card neg">
+        <h3>Riskler / dikkat noktaları</h3>
+        <ul>
+          <li>Gelir büyümesi fiilen durdu (TTM'de negatif) — bu bir "yeniden hızlanma" hikâyesinin henüz kanıtlanmadığı anlamına geliyor</li>
+          <li>Yaşam bilimleri segmenti (Medidata/BIOVIA) zayıf, gelir gerilemesi devam ediyor</li>
+          <li>1,8-2 milyar $'lık ArisGlobal devralımı entegrasyon riski taşıyor; kapanış tarihi netleşmedi, özel sermaye satıcısından (Nordic Capital) tam çıkış işlemi</li>
+          <li>Hisse fiyatı 52 haftalık zirveden ~%31 gerilemiş — piyasa büyüme yavaşlamasını fiyatlamış durumda, ancak bu aynı zamanda beklenti aşımı/aşağı yönlü sürpriz riskinin de bir göstergesi olabilir</li>
+          <li>Rekabet baskısı: PTC ve Autodesk hem daha hızlı büyüyor hem de (PTC özelinde) çok daha yüksek marjla çalışıyor</li>
+          <li>Liderlik geçiş dönemi (yeni CEO + başkan rolü birleşmesi) — stratejik sürekliliğin test edileceği bir aşama</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>5. Altını Çizeceğimiz Önemli Noktalar</h2>
+    <div class="keypoints">
+      <div class="kp-item"><span class="kp-num">1</span><span class="kp-text"><strong>Büyüme durdu, kârlılık büyüdü.</strong> 2022'de %16,6 olan gelir büyümesi 2025'te %0,36'ya, TTM'de -%1,7'ye geriledi; buna karşın net marj %16,4'ten %21,3'e çıktı. Şirket şu an bir "verimlilik hikâyesi" anlatıyor, "büyüme hikâyesi" değil.</span></div>
+      <div class="kp-item"><span class="kp-num">2</span><span class="kp-text"><strong>Hisse %31 geriledi ama F/K hâlâ emsallerine göre pahalı sayılabilir.</strong> İleriye dönük F/K (15,4) Autodesk (16,3) ile benzer, ama PTC'nin (12,5 F/K, +%19 büyüme, %44,6 net marj) çok gerisinde bir büyüme/marj profili sunuyor — göreli değerleme dikkatle izlenmeli.</span></div>
+      <div class="kp-item"><span class="kp-num">3</span><span class="kp-text"><strong>ArisGlobal devralımı (1,8-2 Mlyr $) kilit bir bahis.</strong> Zayıflayan yaşam bilimleri segmentini AI ile canlandırma girişimi — başarılı olursa 2027+ büyüme motoru olabilir, entegrasyon sorunu yaşanırsa ek bir yük haline gelebilir.</span></div>
+      <div class="kp-item"><span class="kp-num">4</span><span class="kp-text"><strong>Endüstriyel çekirdek (CATIA/SOLIDWORKS/DELMIA/ENOVIA/SIMULIA) toparlanıyor.</strong> Kaban Makina gibi bir üretim/makine şirketi için bu segment doğrudan ilgili — yeni EV/üretim tesisi anlaşmaları (JSW Greentech, SOLIZE) sektörel talebin canlandığına işaret ediyor.</span></div>
+      <div class="kp-item"><span class="kp-num">5</span><span class="kp-text"><strong>Şirketin kendi 2026 rehberi mütevazı</strong> (%3-5 gelir, %3-6 EPS büyümesi) — yönetim de hızlı bir toparlanma vaat etmiyor; analist konsensüsü de "Al" ama sınırlı yukarı potansiyelle (~%13) temkinli bir iyimserlik gösteriyor.</span></div>
+      <div class="kp-item"><span class="kp-num">6</span><span class="kp-text"><strong>Liderlik geçişi tamamlandı ama yeni.</strong> Pascal Daloz hem CEO hem yönetim kurulu başkanı — 43 yıllık Bernard Charlès döneminden sonra stratejik sürekliliğin nasıl yönetileceği önümüzdeki çeyreklerde netleşecek.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <h3>Kaynaklar</h3>
+    <ol>
+      <li>stockanalysis.com — Dassault Systèmes SE (EPA:DSY) hisse ve finansal veriler.</li>
+      <li>stockanalysis.com — PTC Inc. (PTC) finansal veriler.</li>
+      <li>stockanalysis.com — Autodesk Inc. (ADSK) finansal veriler.</li>
+      <li>Wikipedia — "Dassault Systèmes" (en.wikipedia.org).</li>
+      <li>Bing News — "Dassault Systemes news" başlık derlemesi, 11 Eylül 2026 erişim.</li>
+      <li>Bing News — "Dassault Systemes stock analysis 2026" başlık derlemesi (Reuters, Seeking Alpha, Ad Hoc News, Morningstar kaynaklı özetler).</li>
+      <li>Bing News — PTC/Autodesk/Siemens/Dassault rekabet ortamı (ABI Research MCAD/PLM değerlendirmeleri).</li>
+      <li>Bing News — ArisGlobal devralımı haberleri (Reuters, Financial Times aktarımı).</li>
+    </ol>
+    <p class="final-note">Bu rapor otomatik olarak derlenmiş bir durum değerlendirmesidir, birincil kaynaklarla (şirketin resmi finansal raporları) teyit edilmemiştir ve yatırım tavsiyesi niteliği taşımaz. Güncel ve doğrulanmış veriler için şirketin yatırımcı ilişkileri sayfasını ve resmi finansal raporlarını kontrol edin.</p>
+  </footer>
+
+</div>
+</body>
+</html>

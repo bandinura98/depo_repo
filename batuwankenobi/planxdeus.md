@@ -1,0 +1,965 @@
+# PLAN X DEUS — Jetonlu Görüntülü Görüşme Platformu
+## Aşamalı Geliştirme Planı
+
+> **Bu doküman nasıl kullanılır:**
+> Her aşama bağımsız bir görev paketidir. Sırayla ilerle.
+> Yeni bir Claude oturumuna **önce "SABİT BAĞLAM" bölümünü**, sonra sıradaki **tek bir aşamayı** yapıştır.
+> Aşama bitince kabul kriterlerini doğrula, sonra bir sonrakine geç.
+> Aşama 1 projeye bir `CLAUDE.md` yazacak; sonraki oturumlar o dosyayı otomatik okuyacağı için
+> bağlam kaybı olmayacak.
+
+---
+
+# 📌 SABİT BAĞLAM
+*(Her yeni oturuma bu bölümü yapıştır)*
+
+## Ürün nedir
+Mobil uygulama. Kullanıcı jeton (token) satın alır. Uygulamadaki müsait uzmanlardan biriyle
+**birebir görüntülü görüşme** başlatır. Görüşme sürdükçe jetonu eksilir. Jetonu bitince görüşme kapanır.
+Uzman, görüşme başına hakediş kazanır.
+
+## Ölçek
+- Aynı anda **en fazla 20 görüşme** (40 katılımcı)
+- Tek sunucu yeterli. Mikroservis, kubernetes, sharding **YOK**.
+
+## Teknoloji (KİLİTLİ — değiştirme)
+| Katman | Seçim |
+|---|---|
+| Backend | .NET 9 / ASP.NET Core Web API |
+| Veritabanı | PostgreSQL 16 + EF Core 9 (Npgsql) |
+| Önbellek/Anlık durum | Redis 7 (StackExchange.Redis) |
+| Gerçek zamanlı | SignalR |
+| Video | LiveKit (Cloud ile başla, self-host'a geçilebilir) |
+| Ödeme | iyzico (test ortamı ile başla) |
+| Bildirim | Firebase Cloud Messaging (Android) + APNs/VoIP (iOS) |
+| Loglama | Serilog |
+| Doğrulama | FluentValidation |
+| Test | xUnit + Testcontainers |
+| Admin panel | Blazor Server (aynı C# yığını) |
+| Mobil | React Native + Expo (dev build) |
+| Yerel geliştirme | Docker Compose (Postgres + Redis + LiveKit) |
+
+## Solution yapısı (KİLİTLİ)
+```
+JetonApp/
+├─ src/
+│  ├─ Jeton.Domain/          # Entity'ler, enum'lar, domain kuralları. Hiçbir şeye bağımlı değil.
+│  ├─ Jeton.Application/     # Use-case'ler, arayüzler (interface), DTO'lar
+│  ├─ Jeton.Infrastructure/  # EF Core, Redis, LiveKit, iyzico, FCM implementasyonları
+│  ├─ Jeton.Api/             # Controller'lar, SignalR hub'ları, DI, middleware
+│  └─ Jeton.Admin/           # Blazor Server admin paneli
+├─ tests/
+│  ├─ Jeton.Tests.Unit/
+│  └─ Jeton.Tests.Integration/
+├─ mobile/                   # React Native (Aşama 14'te açılacak)
+├─ docker-compose.yml
+├─ CLAUDE.md
+└─ docs/decisions/           # Karar kayıtları (ADR)
+```
+
+## Modüller (KİLİTLİ)
+`Identity` · `Wallet` · `Presence` · `Matching` · `Calls` · `Earnings` · `Admin`
+
+Her modül `Domain` ve `Application` içinde kendi klasöründe yaşar.
+**Modüller birbirine sadece arayüz üzerinden dokunur.** Bir modülün EF entity'sini
+başka modülün servisi doğrudan sorgulayamaz.
+
+---
+
+## ⛔ DEĞİŞMEZ KURALLAR
+Bu kurallardan biri ihlal edilirse aşama **kabul edilmez**.
+
+1. **Bakiye kolonu asla `UPDATE` edilmez.** Para hareketi = `WalletEntries` tablosuna yeni satır.
+   `WalletBalances` sadece hız için tutulan özettir ve **aynı veritabanı işlemi (transaction) içinde**
+   güncellenir.
+2. **Sayaç sunucuda çalışır.** İstemcinin "şu kadar konuştum" beyanına asla güvenilmez.
+3. **Video akışı backend'den geçmez.** Backend sadece LiveKit oda bileti üretir. Medya
+   doğrudan cihaz ↔ LiveKit arasında akar.
+4. **Her para hareketi idempotent olmalı.** `IdempotencyKey` zorunlu. Aynı istek iki kez
+   gelirse ikinci kez para hareketi oluşmaz.
+5. **Dış sağlayıcılar arayüz arkasında.** `IVideoRoomProvider`, `IPaymentProvider`,
+   `IPushProvider`. Controller/servis asla LiveKit veya iyzico SDK'sını doğrudan çağırmaz.
+6. **Görüşme kaydı YOK.** Ses/görüntü kaydı, ekran görüntüsü, transkript — hiçbiri yok.
+   Bu bilinçli bir üründür kararıdır, KVKK yükünü ortadan kaldırır.
+7. **Mikroservis YOK.** Tek deploy edilebilir API + tek admin uygulaması.
+8. **Uzman kaydı self-servis DEĞİL.** Uzmanları admin elle ekler. Başvuru/belge/onay akışı yok.
+9. **Otomatik ödeme çıkışı YOK.** Sistem sadece hakediş raporu üretir, ödemeyi insan yapar.
+10. **Her aşama derlenebilir ve çalışır durumda bırakılmalı.** Yarım bırakılmış, derlenmeyen
+    kod bir sonraki aşamaya devredilmez.
+
+---
+
+## 📊 İŞ KURALLARI (sabit sayılar — uydurma, bunları kullan)
+
+| Kural | Değer |
+|---|---|
+| Sayaç tik aralığı | 10 saniye |
+| Çağrı çalma süresi (uzman cevaplamazsa) | 20 saniye |
+| Zincirde denenecek maksimum uzman sayısı | 3 |
+| Düşük bakiye uyarısı | Kalan bakiye 60 saniyelik konuşmaya düştüğünde |
+| Görüşme başlatmak için minimum bakiye | 2 dakikalık jeton |
+| Bağlantı koparsa | Son tik iade edilir |
+| Varsayılan platform komisyonu | %30 (ayardan değiştirilebilir) |
+| Presence kalp atışı aralığı | 15 saniye |
+| Presence Redis TTL | 45 saniye |
+| Maksimum görüşme süresi | 120 dakika (güvenlik sınırı) |
+
+## Jeton fiyatlandırma
+- `AppSettings.DefaultTokensPerMinute` → genel fiyat
+- `ExpertProfiles.TokensPerMinute` → **boş bırakılabilir**. Boşsa genel fiyat geçerli.
+- Böylece sabit fiyat da, uzman bazlı fiyat da desteklenir. Kod değişikliği gerekmez.
+
+---
+
+## 🔴 AÇIK KONULAR (ilgili aşamaya gelmeden netleştirilmeli)
+- **Aşama 5'ten önce:** Google Play / Apple App Store, birebir canlı insan hizmeti için
+  harici ödeme yöntemine izin veriyor mu? Apple'ın "Person-to-Person Services" maddesi bu modele
+  uygun görünüyor ancak **Google tarafı teyit edilmeli.** Cevaba göre ödeme modülü ya iyzico ile
+  ya da mağaza içi satın alma ile kurulur.
+- **Aşama 11'den önce:** Uzmana ödeme fatura ile mi, gider pusulası + stopaj ile mi yapılacak?
+  Mali müşavire sorulacak. Sadece rapor formatını etkiler, kod mimarisini değil.
+
+---
+
+# 🚀 AŞAMALAR
+
+**Toplam: 17 aşama.** Aşama 1-13 backend + admin, 14-16 mobil, 17 yayına alma.
+
+| # | Aşama | Süre | Grup |
+|---|---|---|---|
+| 1 | Solution iskeleti ve altyapı | 2 gün | Temel |
+| 2 | Veri modeli ve migration'lar | 2 gün | Temel |
+| 3 | Kimlik ve kullanıcı yönetimi | 4 gün | Temel |
+| 4 | Cüzdan defteri | 4 gün | Para |
+| 5 | Ödeme entegrasyonu | 4 gün | Para |
+| 6 | Müsaitlik (Presence) | 4 gün | Görüşme |
+| 7 | Eşleştirme ve arama zinciri | 4 gün | Görüşme |
+| 8 | Görüşme yaşam döngüsü + video | 6 gün | Görüşme |
+| 9 | Sayaç ve ücretlendirme | 5 gün | Görüşme |
+| 10 | Push bildirim ve çağrı uyandırma | 4 gün | Görüşme |
+| 11 | Hakediş ve raporlar | 3 gün | Yönetim |
+| 12 | Admin paneli | 6 gün | Yönetim |
+| 13 | Sertleştirme ve güvenlik | 4 gün | Yönetim |
+| 14 | Mobil iskelet ve giriş | 5 gün | Mobil |
+| 15 | Mobil görüşme akışı | 7 gün | Mobil |
+| 16 | Mobil cüzdan ve uzman modu | 5 gün | Mobil |
+| 17 | Uçtan uca test ve yayına alma | 5 gün | Yayın |
+
+---
+
+## AŞAMA 1 — Solution iskeleti ve altyapı
+
+**Ön koşul:** Yok
+**Süre:** 2 gün
+
+### Amaç
+Boş ama çalışan, derlenen, ayağa kalkan bir iskelet. Bundan sonraki her aşama bunun üstüne eklenecek.
+
+### Yapılacaklar
+1. `JetonApp` solution'ını ve yukarıdaki 5 projeyi oluştur. Proje referansları:
+   `Api → Application → Domain`, `Api → Infrastructure → Application`, `Admin → Application`.
+   `Domain` hiçbir projeye referans vermez.
+2. `docker-compose.yml`: PostgreSQL 16, Redis 7, LiveKit (dev modu). Sabit portlar, isimli volume'ler.
+3. Konfigürasyon: `appsettings.json` + `appsettings.Development.json`.
+   **Gizli bilgiler (connection string, API anahtarları) koda yazılmaz** — User Secrets / ortam değişkeni.
+   Güçlü tipli Options sınıfları kullan (`DatabaseOptions`, `RedisOptions`, `LiveKitOptions` vb.).
+4. Serilog: konsol + dosya. Her isteğe `CorrelationId` ekleyen middleware.
+5. Global hata yakalama middleware'i → **RFC 7807 ProblemDetails** formatında cevap.
+   Beklenen hatalar için `DomainException` hiyerarşisi kur (`NotFoundException`,
+   `ValidationException`, `InsufficientBalanceException`, `ConflictException`).
+6. `/health` endpoint'i (Postgres + Redis kontrolü ile).
+7. Swagger/OpenAPI, sadece Development ortamında açık.
+8. `Jeton.Tests.Unit` ve `Jeton.Tests.Integration` projeleri. Integration testleri **Testcontainers**
+   ile gerçek Postgres+Redis kaldırsın. Bir tane geçen dummy test yaz.
+9. **`CLAUDE.md` yaz.** İçine bu dokümandaki "SABİT BAĞLAM", "DEĞİŞMEZ KURALLAR" ve
+   "İŞ KURALLARI" bölümlerini aynen koy. Ayrıca: klasör haritası, çalıştırma komutları,
+   kod stili, isimlendirme kuralları.
+10. `docs/decisions/0001-mimari-secimler.md` — neden modüler monolit, neden LiveKit, neden ledger.
+11. `.gitignore`, `.editorconfig`, `README.md`. Git deposunu başlat, ilk commit.
+
+### Kabul kriterleri
+- [ ] `docker compose up -d` → Postgres, Redis, LiveKit ayakta
+- [ ] `dotnet build` → sıfır hata, sıfır uyarı
+- [ ] `dotnet run --project src/Jeton.Api` → `/health` 200 dönüyor
+- [ ] `dotnet test` → yeşil
+- [ ] `CLAUDE.md` mevcut ve değişmez kuralları içeriyor
+
+### Dokunma
+İş mantığı yazma. Entity, controller, servis yok. Sadece iskelet.
+
+---
+
+## AŞAMA 2 — Veri modeli ve migration'lar
+
+**Ön koşul:** Aşama 1
+**Süre:** 2 gün
+
+### Amaç
+Tüm veritabanı şemasını tek seferde kur. Sonraki aşamalar sadece kullanacak.
+
+### Yapılacaklar
+`Jeton.Domain` içinde modül klasörlerine göre entity'leri yaz. EF yapılandırması
+`Jeton.Infrastructure/Persistence/Configurations` altında **ayrı `IEntityTypeConfiguration` sınıfları**
+olarak — DbContext içine fluent API yığma.
+
+**Identity modülü**
+- `User`: Id (Guid), PhoneNumber (benzersiz), DisplayName, PhotoUrl, Role (enum: Customer/Expert/Admin),
+  Status (enum: Active/Suspended/Deleted), CreatedAt, LastSeenAt
+- `ExpertProfile`: UserId (PK+FK), Headline, Bio, Category, `TokensPerMinute` (**nullable**),
+  `PlatformCommissionPercent` (nullable → genel ayar), IsPublished, SortOrder, TotalCallCount, AverageRating
+- `Device`: Id, UserId, Platform (enum: Android/iOS), PushToken, VoipToken, AppVersion, LastSeenAt
+- `OtpCode`: Id, PhoneNumber, CodeHash, ExpiresAt, AttemptCount, ConsumedAt
+
+**Wallet modülü**
+- `WalletEntry`: Id, UserId, `Amount` (long, +/-), `Kind` (enum: Purchase/CallCharge/Refund/Bonus/
+  AdminAdjustment), RefType, RefId, `IdempotencyKey` (**benzersiz indeks**), Description, CreatedAt
+  → **Sadece INSERT. Update/Delete yasak.**
+- `WalletBalance`: UserId (PK), Balance (long), `RowVersion` (eşzamanlılık için), UpdatedAt
+- `TokenPackage`: Id, Name, TokenAmount, PriceTry, IsActive, SortOrder
+- `Payment`: Id, UserId, Provider, ProviderRef, PackageId, AmountTry, TokenAmount,
+  Status (enum: Pending/Succeeded/Failed/Refunded), CreatedAt, CompletedAt
+
+**Calls modülü**
+- `Call`: Id, CustomerId, ExpertId, Status (enum: Requested/Ringing/Active/Ended/Failed),
+  RoomName, TokensPerMinuteSnapshot (**o anki fiyat dondurulur**), RequestedAt, AnsweredAt, EndedAt,
+  BilledSeconds, TokensCharged, EndReason (enum: CustomerHangup/ExpertHangup/OutOfTokens/
+  Timeout/Disconnected/NoExpertAvailable/MaxDuration/AdminTerminated)
+- `CallAttempt`: Id, CallId, ExpertId, SentAt, RespondedAt, Result (enum: Accepted/Declined/Timeout/Unreachable)
+- `CallTick`: Id, CallId, TickAt, Seconds, TokensCharged, RunningBalance
+  → itiraz durumunda tek dayanak
+
+**Earnings modülü**
+- `ExpertEarning`: Id, CallId (benzersiz), ExpertId, GrossTokens, CommissionPercent,
+  PlatformTokens, NetTokens, NetAmountTry, PeriodYearMonth, CreatedAt
+
+**Admin/Sistem**
+- `AppSetting`: Key (PK), Value, Description, UpdatedAt, UpdatedBy
+- `AuditLog`: Id, ActorUserId, Action, EntityType, EntityId, PayloadJson, IpAddress, CreatedAt
+
+### Ek gereksinimler
+- Tüm zamanlar **UTC**, `timestamptz` olarak saklanır
+- Para/jeton alanları `long` (asla `double`/`float`)
+- `WalletEntry` üzerinde `(UserId, CreatedAt)` indeksi; `IdempotencyKey` benzersiz indeksi
+- `Call` üzerinde `(Status)`, `(ExpertId, RequestedAt)`, `(CustomerId, RequestedAt)` indeksleri
+- İlk migration + seed: varsayılan `AppSetting` kayıtları, 3 adet `TokenPackage`, 1 admin kullanıcısı
+- `WalletEntry` için EF `SaveChanges` seviyesinde **update/delete engelleyen koruma** ekle
+
+### Kabul kriterleri
+- [ ] `dotnet ef database update` temiz veritabanında sorunsuz çalışıyor
+- [ ] Seed verisi yüklü
+- [ ] `WalletEntry` güncellemeye çalışan bir test **hata fırlatıyor**
+- [ ] Şema diyagramı `docs/` altına çıkarılmış
+
+### Dokunma
+Controller, servis, iş mantığı yok. Sadece şema.
+
+---
+
+## AŞAMA 3 — Kimlik ve kullanıcı yönetimi
+
+**Ön koşul:** Aşama 2
+**Süre:** 4 gün
+
+### Amaç
+Telefon numarası + SMS kodu ile giriş. JWT. Rol bazlı yetki. Profil ve cihaz kaydı.
+
+### Yapılacaklar
+1. `ISmsProvider` arayüzü. İki implementasyon: `FakeSmsProvider` (kodu loga yazar, geliştirme için)
+   ve gerçek sağlayıcı için boş iskelet. Development'ta sabit test numarası + sabit kod (örn. 1111).
+2. Uç noktalar:
+   - `POST /auth/request-otp` → numara al, kod üret, hash'leyip sakla, SMS gönder
+   - `POST /auth/verify-otp` → doğrula, kullanıcı yoksa oluştur, access + refresh token dön
+   - `POST /auth/refresh` → token yenile
+   - `POST /auth/logout` → refresh token iptal
+3. OTP güvenliği: kod **hash'lenerek** saklanır, 3 dakika geçerli, en fazla 5 deneme,
+   numara başına dakikada 1 istek limiti, kullanılan kod tekrar kullanılamaz.
+4. JWT: access token 15 dakika, refresh token 30 gün (döner/rotating). Claim'ler: `sub`, `role`, `deviceId`.
+5. Yetkilendirme politikaları: `CustomerOnly`, `ExpertOnly`, `AdminOnly`.
+6. Profil uç noktaları: `GET /me`, `PATCH /me` (ad, foto).
+7. Cihaz kaydı: `POST /me/devices` → push token kaydet/güncelle.
+8. `ICurrentUser` servisi (Application katmanında arayüz, Api katmanında implementasyon).
+
+### Kabul kriterleri
+- [ ] Yeni numarayla giriş → kullanıcı otomatik oluşuyor, rol `Customer`
+- [ ] Yanlış kod 5 kez → hesap geçici kilitleniyor
+- [ ] Süresi geçmiş kod reddediliyor
+- [ ] Refresh token rotasyonu çalışıyor, eski token geçersiz
+- [ ] `AdminOnly` uç noktasına müşteri token'ı ile erişim → 403
+- [ ] Entegrasyon testleri: giriş akışının tamamı
+
+### Dokunma
+Uzman ekleme/düzenleme Aşama 12'de (admin panel). Şimdilik uzman kullanıcıları
+seed verisi ya da doğrudan SQL ile oluştur.
+
+---
+
+## AŞAMA 4 — Cüzdan defteri
+
+**Ön koşul:** Aşama 3
+**Süre:** 4 gün
+
+### Amaç
+**Projenin en kritik modülü.** Para burada. Yanlış yazılırsa geri dönüşü zor.
+
+### Yapılacaklar
+1. `IWalletService`:
+   - `GetBalanceAsync(userId)`
+   - `CreditAsync(userId, amount, kind, refType, refId, idempotencyKey, description)`
+   - `DebitAsync(...)` → bakiye yetmezse `InsufficientBalanceException`
+   - `HasMinimumAsync(userId, amount)`
+   - `GetHistoryAsync(userId, page, size)`
+2. **Eşzamanlılık:** Her hareket tek transaction içinde:
+   `WalletBalance` satırını `SELECT ... FOR UPDATE` ile kilitle → `WalletEntry` ekle →
+   `WalletBalance` güncelle → commit.
+   Alternatif olarak `RowVersion` ile iyimser kilit + yeniden deneme. Hangisini seçtiysen ADR'ye yaz.
+3. **Idempotency:** `IdempotencyKey` zaten varsa yeni hareket **oluşturma**, mevcut kaydı dön.
+   Benzersiz indeks ihlalini yakala ve sessizce mevcut kaydı dön.
+4. Negatif bakiye **imkânsız** olmalı — veritabanı seviyesinde `CHECK (Balance >= 0)` kısıtı ekle.
+5. Uç noktalar:
+   - `GET /wallet/balance`
+   - `GET /wallet/history?page=&size=`
+   - `GET /wallet/packages` → aktif jeton paketleri
+   - `POST /admin/wallet/adjust` (AdminOnly) → elle jeton ekle/çıkar, sebep zorunlu, AuditLog'a yazılır
+6. `IWalletService` tüm para hareketlerinin **tek kapısı**. Başka hiçbir yerden
+   `WalletEntry` eklenmeyecek.
+
+### Kabul kriterleri
+- [ ] **Eşzamanlılık testi:** Aynı kullanıcı için 50 paralel düşüm isteği → bakiye tutarlı,
+      hiç negatif olmuyor, defter toplamı ile özet bakiye eşit
+- [ ] Aynı `IdempotencyKey` ile 2 istek → tek hareket oluşuyor
+- [ ] Bakiye yetmezken düşüm → `InsufficientBalanceException`, hareket oluşmuyor
+- [ ] Defter toplamı ile özet bakiye her senaryoda eşit (doğrulama testi yaz)
+- [ ] Admin düzeltmesi `AuditLog`'a düşüyor
+
+### Dokunma
+Gerçek ödeme entegrasyonu yok (Aşama 5). Şimdilik jeton sadece admin tarafından elle yüklenir.
+
+---
+
+## AŞAMA 5 — Ödeme entegrasyonu
+
+**Ön koşul:** Aşama 4 · 🔴 **Mağaza komisyon konusu netleşmiş olmalı**
+**Süre:** 4 gün
+
+### Amaç
+Kullanıcı gerçek para ile jeton satın alsın.
+
+### Yapılacaklar
+1. `IPaymentProvider` arayüzü: `CreateCheckoutAsync(userId, packageId)`,
+   `VerifyCallbackAsync(payload, signature)`, `RefundAsync(paymentId)`.
+2. `IyzicoPaymentProvider` implementasyonu (**test ortamı anahtarlarıyla**).
+   Ayrıca `FakePaymentProvider` — otomatik test için.
+3. Akış:
+   - `POST /payments/checkout` → `Payment` kaydı `Pending` oluştur, ödeme sayfası URL'i dön
+   - `POST /payments/callback` → **imza doğrula**, `Payment` durumunu `Succeeded` yap,
+     `IWalletService.CreditAsync` ile jetonu yükle. IdempotencyKey = `payment:{paymentId}`
+   - `GET /payments/{id}` → durum sorgulama (mobil bu uç noktayı yoklar)
+4. **Webhook güvenliği:** İmza doğrulanmadan hiçbir işlem yapılmaz. Aynı webhook 5 kez gelse
+   jeton bir kez yüklenir. Bilinmeyen `ProviderRef` → 200 dön ama işlem yapma
+   (yeniden deneme fırtınası olmasın).
+5. Ödeme sağlayıcısı geç cevap verirse: `Pending` kayıtları tarayan arka plan işi,
+   30 dakikadan eski `Pending` kayıtları sağlayıcıya sorup sonuçlandırsın.
+6. İade: `POST /admin/payments/{id}/refund` → sağlayıcıdan iade + jetonu geri al
+   (bakiye yetmiyorsa negatife düşürme, `AdminAdjustment` ile borç kaydı tut ve admin'i uyar).
+
+### Kabul kriterleri
+- [ ] Test kartıyla uçtan uca satın alma → jeton bakiyeye yansıyor
+- [ ] Aynı webhook 5 kez → jeton **bir kez** yükleniyor
+- [ ] Geçersiz imzalı webhook → 401, hiçbir değişiklik yok
+- [ ] Başarısız ödeme → jeton yüklenmiyor, `Payment` durumu `Failed`
+- [ ] Askıda kalan ödeme arka plan işiyle sonuçlanıyor
+
+### Dokunma
+Mobil taraf yok. Postman/curl ile test yeterli.
+
+---
+
+## AŞAMA 6 — Müsaitlik (Presence)
+
+**Ön koşul:** Aşama 3
+**Süre:** 4 gün
+
+### Amaç
+Kimin gerçekten müsait olduğunu bilmek. Online bayrağı yalan söyler, kalp atışı söylemez.
+
+### Yapılacaklar
+1. SignalR `PresenceHub`. JWT ile kimlik doğrulamalı bağlantı.
+2. Üç durum: `Offline` / `Available` / `InCall`.
+   Uzmanın `Available` olabilmesi için **iki şart birden**: (a) müsaitlik anahtarını açmış olması,
+   (b) canlı SignalR bağlantısının olması ve kalbinin atıyor olması.
+3. Redis şeması:
+   - `presence:{userId}` → durum, TTL **45 saniye**
+   - `presence:available` → müsait uzmanların Redis Set'i
+   - Kalp atışı her **15 saniyede** TTL'i yeniler
+4. Hub metotları: `Heartbeat()`, `SetAvailability(bool)`.
+   Bağlantı koptuğunda (`OnDisconnectedAsync`) anında `Offline` yap ve Set'ten çıkar.
+5. `IPresenceService` (Application katmanı):
+   `GetStatusAsync(userId)`, `GetAvailableExpertsAsync()`, `SetStatusAsync(userId, status)`,
+   `TryReserveAsync(expertId)` → uzmanı atomik olarak `InCall`'a çevirir (**Redis Lua script ile**,
+   iki müşteri aynı uzmanı kapamasın).
+6. Uç noktalar:
+   - `GET /experts` → uzman listesi + anlık durum (müsait olanlar üstte)
+   - `GET /experts/{id}`
+   - `POST /me/availability` (ExpertOnly)
+7. Müşterilere canlı durum yayını: uzman durumu değişince `PresenceHub` üzerinden
+   `ExpertStatusChanged` olayı gönder.
+8. **Yetim kayıt temizliği:** Arka plan işi, TTL'i geçmiş ama Set'te kalmış kayıtları temizlesin.
+
+### Kabul kriterleri
+- [ ] Uygulama kapatılınca uzman **45 saniye içinde** listeden düşüyor
+- [ ] Kalp atışı devam ettiği sürece müsait kalıyor
+- [ ] `TryReserveAsync` eşzamanlılık testi: 10 paralel çağrı → **sadece 1 tanesi** başarılı
+- [ ] Redis yeniden başlatılınca sistem çökmüyor, kullanıcılar yeniden bağlanınca durum düzeliyor
+- [ ] Uzman müsaitliğini kapatınca müşteri listesi anında güncelleniyor
+
+### Dokunma
+Görüşme başlatma yok (Aşama 7-8). Sadece "kim müsait" sorusunun cevabı.
+
+---
+
+## AŞAMA 7 — Eşleştirme ve arama zinciri
+
+**Ön koşul:** Aşama 6
+**Süre:** 4 gün
+
+### Amaç
+Müşteri "görüşmek istiyorum" dediğinde doğru uzmanı bulmak, cevap vermezse sıradakine geçmek.
+
+### Yapılacaklar
+1. **Strategy deseni:** `IMatchingStrategy` arayüzü, metot: `SelectAsync(request, candidates)`.
+   Üç implementasyon yaz:
+   - `DirectExpertStrategy` → müşteri belirli bir uzmanı seçti
+   - `FirstAvailableStrategy` → ilk müsait olan (**varsayılan**)
+   - `LeastBusyStrategy` → bugün en az görüşme yapmış olan
+   Hangisinin aktif olacağı `AppSettings` üzerinden seçilir.
+2. `ICallRouter`: `RouteAsync(customerId, preferredExpertId?)`
+   - Müşterinin bakiyesini kontrol et (**minimum 2 dakikalık**) — yetmezse `InsufficientBalanceException`
+   - Aday uzmanları bul, stratejiyle sırala
+   - `Call` kaydını `Requested` durumunda oluştur
+   - Zinciri başlat
+3. **Arama zinciri:**
+   - Sıradaki uzmanı `TryReserveAsync` ile rezerve et
+   - `CallAttempt` kaydı aç, `Call` durumunu `Ringing` yap
+   - Uzmana SignalR + push ile çağrı gönder
+   - **20 saniye** bekle → cevap yoksa `Timeout` yaz, uzmanı serbest bırak, sıradakine geç
+   - Uzman reddederse → `Declined` yaz, anında sıradakine geç
+   - **En fazla 3 uzman** denenir. Hepsi düşerse `Call` → `Failed`, sebep `NoExpertAvailable`
+4. Zamanlayıcı mantığını **kalıcı hale getir** — sunucu yeniden başlarsa askıda kalan
+   `Ringing` çağrılar temizlensin (arka plan işi: 60 saniyeden eski `Ringing` → `Failed`).
+5. Uç noktalar:
+   - `POST /calls/request` → `{ preferredExpertId? }` → CallId dön
+   - `POST /calls/{id}/accept` (ExpertOnly)
+   - `POST /calls/{id}/decline` (ExpertOnly)
+   - `POST /calls/{id}/cancel` (müşteri çalarken vazgeçti)
+6. Tüm durum değişiklikleri SignalR ile **iki tarafa da** bildirilir.
+
+### Kabul kriterleri
+- [ ] Uzman 20 saniye cevaplamazsa otomatik olarak ikinciye geçiliyor
+- [ ] Reddedince anında sıradakine geçiyor
+- [ ] 3 uzman da düşerse çağrı `Failed`/`NoExpertAvailable` oluyor
+- [ ] Bakiyesi yetmeyen müşteri çağrı başlatamıyor
+- [ ] Rezerve edilen uzman, zincir ilerleyince **serbest bırakılıyor** (kilitli kalmıyor)
+- [ ] Sunucu yeniden başlarsa askıda `Ringing` çağrı kalmıyor
+- [ ] Müşteri çalarken iptal ederse uzman serbest kalıyor
+
+### Dokunma
+Video odası yok, ücretlendirme yok. Sadece "kim kabul etti" mantığı.
+
+---
+
+## AŞAMA 8 — Görüşme yaşam döngüsü + video
+
+**Ön koşul:** Aşama 7
+**Süre:** 6 gün
+
+### Amaç
+Kabul edilen çağrıyı gerçek görüntülü görüşmeye dönüştürmek.
+
+### Yapılacaklar
+1. `IVideoRoomProvider` arayüzü:
+   - `CreateRoomAsync(callId)` → oda adı
+   - `IssueAccessTokenAsync(roomName, userId, role)` → katılım bileti (JWT)
+   - `KickParticipantAsync(roomName, userId)`
+   - `DeleteRoomAsync(roomName)`
+   - `GetRoomInfoAsync(roomName)`
+2. `LiveKitVideoRoomProvider` implementasyonu. **Bir de `FakeVideoRoomProvider`** — testler için.
+3. **Görüşme durum makinesi.** İzin verilen geçişler dışında hiçbir geçiş kabul edilmez:
+```
+Requested ──> Ringing ──> Active ──> Ended
+     │           │           │
+     └───────────┴───────────┴──> Failed
+```
+   Geçersiz geçiş denemesi → `ConflictException`. Bu makineyi **ayrı bir sınıfta** yaz ve
+   birim testlerini yaz.
+4. Kabul akışı:
+   - Uzman kabul etti → `CreateRoomAsync`
+   - Her iki tarafa **ayrı ayrı** erişim bileti üret (biletin ömrü kısa: 5 dakika)
+   - `Call` → `Active`, `AnsweredAt` işaretle
+   - Uzmanın o anki fiyatı `TokensPerMinuteSnapshot` alanına **dondurulur**
+     (görüşme ortasında fiyat değişirse müşteri etkilenmesin)
+5. **LiveKit webhook'ları** (`participant_joined`, `participant_left`, `room_finished`):
+   - İmza doğrula
+   - Gerçek katılım/ayrılma zamanlarını kaydet → Aşama 9'daki mutabakatın temeli
+   - Bir taraf ayrıldığında görüşmeyi sonlandır
+6. Bitiş: `POST /calls/{id}/end`. Kim kapatırsa `EndReason` ona göre yazılır.
+   Oda silinir, uzman `Available`'a döner, iki tarafa SignalR ile bildirim gider.
+7. **Maksimum süre koruması:** 120 dakikayı geçen görüşme otomatik kapanır.
+8. Uç noktalar:
+   - `GET /calls/{id}` → durum + (aktifse) erişim bileti
+   - `GET /calls/history?page=` → geçmiş görüşmeler
+   - `POST /calls/{id}/end`
+
+### Kabul kriterleri
+- [ ] Kabul → iki taraf da odaya girebiliyor, birbirini görüyor (LiveKit test istemcisiyle doğrula)
+- [ ] Geçersiz durum geçişi denemesi reddediliyor (birim testleri var)
+- [ ] Bir taraf kapatınca diğerine **anında** bildirim gidiyor ve oda kapanıyor
+- [ ] Görüşme bitince uzman otomatik `Available` oluyor
+- [ ] Erişim bileti başkasının odasına girmek için kullanılamıyor
+- [ ] Webhook imzası doğrulanmayan istek reddediliyor
+- [ ] 120 dakikada otomatik kapanıyor
+
+### Dokunma
+Jeton düşümü **yok** (Aşama 9). Bu aşamada görüşme bedava.
+
+---
+
+## AŞAMA 9 — Sayaç ve ücretlendirme
+
+**Ön koşul:** Aşama 8
+**Süre:** 5 gün
+
+### Amaç
+**İşin kalbi.** Konuştukça jeton eksilsin, bitince kapansın, haksız kesinti olmasın.
+
+### Yapılacaklar
+1. `CallBillingService` — `BackgroundService` olarak çalışan tik motoru.
+   Aktif görüşmeleri Redis'te tutar, **10 saniyede bir** hepsini işler.
+2. Her tikte, tek transaction içinde:
+   - Geçen süreyi hesapla (tik sayısı × 10 sn, **sunucu saatiyle**)
+   - `TokensPerMinuteSnapshot` üzerinden düşülecek jetonu hesapla
+   - `IWalletService.DebitAsync` — **IdempotencyKey = `call:{callId}:tick:{tickNumber}`**
+     (aynı tik iki kez işlenirse çift kesinti olmaz)
+   - `CallTick` kaydı oluştur
+   - `Call.BilledSeconds` ve `TokensCharged` güncelle
+3. **Uyarı:** Kalan bakiye 60 saniyelik konuşmaya düştüğünde müşteriye SignalR ile
+   `LowBalanceWarning` gönder (bir kez).
+4. **Otomatik kesme:** Bakiye bir sonraki tiki karşılamıyorsa görüşmeyi kapat,
+   `EndReason = OutOfTokens`. Her iki tarafa bildirim.
+5. **Kopma iadesi:** Görüşme `Disconnected` sebebiyle biterse **son tik iade edilir**
+   (`Kind = Refund`, IdempotencyKey = `call:{callId}:disconnect-refund`).
+6. **Mutabakat (reconciliation):** Görüşme bitince LiveKit'ten gerçek katılım süresini al,
+   kesilen süreyle karşılaştır:
+   - Fazla kesilmişse → farkı **otomatik iade et**
+   - Eksik kesilmişse → **iade etme, sadece logla** (müşteriden geriye dönük para alma)
+   - Fark 30 saniyeden büyükse `AuditLog`'a uyarı yaz
+7. **Kritik kural:** Kesinti yapılamayan bir görüşme devam edemez. Veritabanı hatası olursa
+   görüşmeyi güvenli şekilde kapat, kesilemeyen süreyi müşterinin lehine yaz.
+8. Uzman tarafında canlı kazanç göstergesi: her tikte `EarningsUpdated` olayı gönder.
+
+### Kabul kriterleri
+- [ ] 3 dakikalık görüşme → tam 3 dakikalık jeton kesiliyor (±1 tik tolerans)
+- [ ] Bakiye bitince görüşme otomatik kapanıyor, `EndReason = OutOfTokens`
+- [ ] Düşük bakiye uyarısı **60 saniye kala** ve **tek sefer** gidiyor
+- [ ] Aynı tik iki kez işlenirse **çift kesinti olmuyor** (idempotency testi)
+- [ ] Bağlantı kopunca son tik iade ediliyor
+- [ ] `SUM(CallTicks.TokensCharged) == Call.TokensCharged` her görüşmede
+- [ ] Mutabakat testi: LiveKit 100 sn derken sistem 120 sn kesmişse 20 sn iade ediliyor
+- [ ] Servis yeniden başlarsa aktif görüşmeler **kaldığı yerden** ücretlendirilmeye devam ediyor
+
+### Dokunma
+Uzman hakediş hesabı Aşama 11'de.
+
+---
+
+## AŞAMA 10 — Push bildirim ve çağrı uyandırma
+
+**Ön koşul:** Aşama 8
+**Süre:** 4 gün
+
+### Amaç
+Uzmanın telefonu **kilitliyken bile** çağrı gelince çalsın. Bu işin en sancılı teknik kısmı.
+
+### Yapılacaklar
+1. `IPushProvider` arayüzü: `SendCallInviteAsync`, `SendCallCancelledAsync`, `SendDataAsync`.
+2. **Android:** FCM **yüksek öncelikli (high priority) data mesajı**. Uygulama öldürülmüşse
+   bile uyanır. `notification` değil **`data`** payload kullan — kontrol sende olsun.
+3. **iOS:** **PushKit / VoIP push** + CallKit. VoIP push aldıktan sonra
+   **mutlaka CallKit çağrısı raporlanmalı** — yoksa iOS uygulamayı cezalandırır ve
+   sonraki push'ları vermez. Bu kuralı koda yorum olarak yaz.
+4. Çağrı iptal edilirse (müşteri vazgeçti / başka uzman kabul etti) → **iptal push'u** gönder,
+   telefon boşuna çalmasın.
+5. Token yönetimi: geçersiz/süresi dolmuş token'ları sağlayıcı cevabından tespit edip
+   `Device` kaydından temizle.
+6. Yeniden deneme: push gönderimi başarısızsa 2 kez daha dene (kısa aralıkla).
+   Yine olmazsa `CallAttempt.Result = Unreachable` yaz ve zincirde sıradakine geç.
+7. `FakePushProvider` — test ve geliştirme için, loga yazar.
+
+### Kabul kriterleri
+- [ ] Android: uygulama tamamen kapalıyken çağrı geliyor
+- [ ] Android: pil optimizasyonu açık cihazda test edildi, sonuç belgelendi
+- [ ] iOS: telefon kilitliyken CallKit ekranı açılıyor
+- [ ] Çağrı iptal edilince telefon çalmayı **kesiyor**
+- [ ] Geçersiz push token otomatik temizleniyor
+- [ ] Push başarısız olursa zincir sıradaki uzmana geçiyor
+
+### ⚠️ Not
+**Bu aşama gerçek cihazda test edilmeden "tamam" sayılmaz.** Emülatör yeterli değil.
+En az bir Android (tercihen Xiaomi/Huawei gibi agresif pil yönetimi olan) ve bir iPhone gerekir.
+
+---
+
+## AŞAMA 11 — Hakediş ve raporlar
+
+**Ön koşul:** Aşama 9 · 🔴 **Mali müşavir cevabı alınmış olmalı**
+**Süre:** 3 gün
+
+### Amaç
+Uzmanın ne kazandığını hesaplamak ve raporlamak. **Otomatik ödeme yok** — insan ödüyor.
+
+### Yapılacaklar
+1. Görüşme bittiğinde `ExpertEarning` kaydı oluştur:
+   - `GrossTokens` = görüşmede kesilen jeton
+   - `CommissionPercent` = uzman profilindeki oran, boşsa genel ayar (varsayılan %30)
+   - `NetTokens` = brüt − platform payı
+   - `NetAmountTry` = net jeton × jeton birim TL değeri (**o anki kur/fiyat dondurulur**)
+   - `PeriodYearMonth` = `YYYYMM`
+2. Bu kayıt da **idempotent** olmalı — `CallId` benzersiz indeksli, aynı görüşme için iki hakediş olmaz.
+3. Uzman uç noktaları:
+   - `GET /me/earnings/summary` → bugün / bu ay / toplam
+   - `GET /me/earnings?period=YYYYMM` → görüşme bazlı döküm
+4. Admin raporları:
+   - `GET /admin/reports/earnings?period=YYYYMM` → uzman bazlı toplam, **Excel/CSV dışa aktarma**
+   - `GET /admin/reports/revenue?from=&to=` → ciro, platform payı, uzman payı
+   - `GET /admin/reports/calls?from=&to=` → görüşme sayısı, ortalama süre, başarısızlık oranları
+5. Ödeme raporu formatı: mali müşavirin istediği kolonlar (ad, TC/VKN, IBAN, brüt, kesinti, net).
+   **Bu kolonları mali müşavire sorduktan sonra netleştir.**
+
+### Kabul kriterleri
+- [ ] Her biten görüşme için tam bir `ExpertEarning` kaydı var
+- [ ] Aynı görüşme iki kez işlenirse tek hakediş oluşuyor
+- [ ] `SUM(NetTokens) + SUM(PlatformTokens) == SUM(GrossTokens)` (kuruş kaçağı yok)
+- [ ] Aylık rapor Excel'e aktarılıyor ve toplamlar tutuyor
+- [ ] İade edilen görüşmenin hakedişi de düzeltiliyor
+
+---
+
+## AŞAMA 12 — Admin paneli
+
+**Ön koşul:** Aşama 11
+**Süre:** 6 gün
+
+### Amaç
+Sistemi kod yazmadan yönetebilmek.
+
+### Yapılacaklar
+Blazor Server, ayrı port, **ayrı giriş** (admin rolü + güçlü parola/2FA).
+
+**Ekranlar:**
+1. **Pano** — anlık aktif görüşme sayısı, müsait uzmanlar, bugünkü ciro, son 24 saat grafiği
+2. **Kullanıcılar** — arama, detay, jeton geçmişi, görüşme geçmişi, askıya alma
+3. **Uzmanlar** — **elle ekleme** (telefon → uzman rolü ver → profil doldur),
+   düzenleme, fiyat/komisyon belirleme, yayına alma/çıkarma, sıralama
+4. **Jeton paketleri** — ekle/düzenle/pasifleştir
+5. **Görüşmeler** — liste, filtre, detay (tik dökümü dâhil), **aktif görüşmeyi zorla sonlandırma**
+6. **Cüzdan işlemleri** — elle jeton yükleme/düşme (sebep zorunlu), ödeme listesi, iade
+7. **Hakediş** — aylık rapor, Excel dışa aktarma
+8. **Ayarlar** — `AppSettings` düzenleme (fiyat, komisyon, süreler, eşikler)
+9. **Denetim kaydı** — `AuditLog` görüntüleme, filtreleme
+
+**Kurallar:**
+- Her yazma işlemi `AuditLog`'a düşer (kim, ne zaman, ne değiştirdi, eski/yeni değer)
+- Para ile ilgili her işlemde **onay diyaloğu** + sebep alanı zorunlu
+- Admin **asla** doğrudan SQL'e ihtiyaç duymamalı
+
+### Kabul kriterleri
+- [ ] Yeni uzman baştan sona panelden eklenip yayına alınabiliyor
+- [ ] Aktif görüşme panelden sonlandırılabiliyor
+- [ ] Her yönetici işlemi denetim kaydında görünüyor
+- [ ] Ayar değişikliği (örn. dakika fiyatı) **yeniden başlatma gerektirmeden** etkili oluyor
+- [ ] Admin paneli internete açık değil veya IP kısıtlı
+
+---
+
+## AŞAMA 13 — Sertleştirme ve güvenlik
+
+**Ön koşul:** Aşama 12
+**Süre:** 4 gün
+
+### Amaç
+Suistimali ve kazaları önlemek. Yayına çıkmadan önceki son backend işi.
+
+### Yapılacaklar
+1. **Hız sınırlama (rate limiting):**
+   - OTP isteği: numara başına dakikada 1, saatte 5
+   - Çağrı başlatma: kullanıcı başına dakikada 3
+   - Genel API: IP başına dakikada 100
+2. **Suistimal kontrolleri:**
+   - Uzman kendi hesabını arayamaz (aynı kullanıcı kontrolü)
+   - Aynı müşteri-uzman çifti için çok kısa aralıklı tekrarlı çağrı → şüpheli işaretle
+   - Günlük anormal kazanç eşiği aşılırsa admin'e uyarı
+   - Çok sayıda 5 saniyeden kısa görüşme → şüpheli işaretle
+3. **Güvenlik:**
+   - Tüm uç noktalarda giriş doğrulaması (FluentValidation)
+   - HTTPS zorunlu, HSTS
+   - Güvenlik başlıkları (CSP, X-Frame-Options vb.)
+   - Loglarda **telefon numarası, token, IBAN maskeli**
+   - Gizli bilgiler ortam değişkeninde, kod deposunda değil
+   - Kullanıcı sadece **kendi** verisine erişebiliyor mu — her uç nokta için test yaz
+4. **Dayanıklılık:**
+   - Dış servis çağrılarına zaman aşımı + yeniden deneme + devre kesici (Polly)
+   - LiveKit/iyzico/FCM çökerse sistem kontrollü hata versin, çökmesin
+   - Veritabanı bağlantı havuzu ayarları
+5. **İzleme:**
+   - Sağlık kontrolü uç noktaları detaylandır
+   - Kritik metrikler: aktif görüşme, başarısız çağrı oranı, kesinti hataları, kuyruk gecikmesi
+   - Kritik hata olunca bildirim (e-posta/Telegram)
+6. **Veri tutarlılığı kontrolü:** Gecelik arka plan işi —
+   defter toplamı ile bakiyeleri karşılaştır, uyuşmazlık varsa admin'e alarm.
+7. **Yedekleme:** Günlük Postgres yedeği + **geri yükleme tatbikatı yapıldı mı** testi.
+
+### Kabul kriterleri
+- [ ] Hız sınırları çalışıyor (test var)
+- [ ] Başkasının verisine erişim denemesi 403 (her uç nokta için test)
+- [ ] LiveKit kapalıyken çağrı başlatma → temiz hata mesajı, sistem ayakta
+- [ ] Loglarda hassas veri yok (elle kontrol edildi)
+- [ ] Tutarlılık kontrolü işi çalışıyor ve uyumsuzluk yakalıyor
+- [ ] Yedek alınıp **geri yüklendi**, sistem çalıştı
+
+---
+
+## AŞAMA 14 — Mobil iskelet ve giriş
+
+**Ön koşul:** Aşama 3 (giriş uç noktaları hazır)
+**Süre:** 5 gün
+
+### Amaç
+Çalışan mobil uygulama iskeleti: giriş yapabilen, oturumu koruyan, gezinebilen.
+
+### Yapılacaklar
+1. Expo (dev build — **Expo Go yetmez**, native modüller lazım). TypeScript. Klasör yapısı:
+   `src/api`, `src/screens`, `src/components`, `src/store`, `src/hooks`, `src/navigation`
+2. Gezinme: React Navigation. İki yığın — `AuthStack` ve `AppStack`. Rol bazlı sekme:
+   müşteri sekmeleri / uzman sekmeleri (**tek uygulama, rolüne göre farklı ekran**).
+3. API katmanı: tek `apiClient` (axios), otomatik `Authorization` başlığı,
+   **401 alınca refresh token ile sessiz yenileme**, tek seferde tek yenileme (kuyruk).
+4. Token saklama: `expo-secure-store` (AsyncStorage **değil** — güvenlik).
+5. Durum yönetimi: Zustand (basit ve yeterli). Sunucu verisi için TanStack Query.
+6. Ekranlar: Telefon girişi → SMS kodu → (yeni kullanıcıysa) ad girişi → ana ekran.
+7. SignalR istemcisi: giriş yapınca bağlan, arka plana geçince yönet, kopunca **otomatik yeniden bağlan**.
+8. Türkçe arayüz. Metinleri `i18n` dosyasında topla (ileride başka dil eklenebilsin).
+9. Hata yönetimi: ağ hatası, sunucu hatası, oturum bitti — hepsi için kullanıcı dostu ekran/mesaj.
+
+### Kabul kriterleri
+- [ ] Gerçek Android cihazda giriş yapılıyor
+- [ ] Uygulama kapatılıp açılınca oturum korunuyor
+- [ ] Access token süresi dolunca kullanıcı fark etmeden yenileniyor
+- [ ] İnternet yokken anlamlı hata gösteriliyor, uygulama çökmüyor
+- [ ] Müşteri ve uzman farklı sekmeler görüyor
+
+---
+
+## AŞAMA 15 — Mobil görüşme akışı
+
+**Ön koşul:** Aşama 14, Aşama 10
+**Süre:** 7 gün
+
+### Amaç
+Uygulamanın asıl işi: uzmanı bul, ara, görüntülü konuş.
+
+### Yapılacaklar
+1. **Uzman listesi ekranı** (müşteri): kart görünümü, canlı müsaitlik rozeti,
+   dakika fiyatı, kategori filtresi. SignalR ile **anlık durum güncellemesi**.
+2. **Çağrı başlatma:** Uzmana bas → "dakikası X jeton, bakiyen Y dakika yeter" onay ekranı →
+   bakiye yetmezse **doğrudan jeton satın alma ekranına yönlendir**.
+3. **Arıyor ekranı** (müşteri): uzman bilgisi, çalıyor animasyonu, iptal butonu,
+   "başka uzmana yönlendiriliyor" durumu.
+4. **Gelen çağrı ekranı** (uzman): CallKit (iOS) / tam ekran bildirim (Android),
+   kabul / reddet, **geri sayım göstergesi (20 sn)**.
+5. **Görüşme ekranı:**
+   - LiveKit React Native SDK ile video
+   - Karşı taraf tam ekran, kendi görüntün küçük pencerede (sürüklenebilir)
+   - Kontroller: mikrofon kapat, kamera kapat, kamera çevir, kapat
+   - **Üstte: kalan süre / kalan jeton sayacı** (canlı)
+   - Bağlantı kalitesi göstergesi
+   - Uzman tarafında: kazanılan tutar canlı
+6. **Düşük bakiye uyarısı:** 60 saniye kalınca ekranda uyarı + "jeton yükle" butonu.
+   **Görüşmeyi kesmeden** satın alma yapılabilmeli (arka planda ödeme akışı).
+7. **Görüşme sonu ekranı:** süre, harcanan jeton, kalan bakiye, (isteğe bağlı) puanlama.
+8. **Uç durumlar — hepsi ele alınacak:**
+   - Görüşme sırasında internet koptu → yeniden bağlanma denemesi, olmadıysa temiz kapanış
+   - Uygulama arka plana atıldı → görüşme devam etsin, bildirim göstersin
+   - Gerçek telefon araması geldi → görüşmeyi duraklat/kapat
+   - Uygulama öldürüldü → sunucu tarafı görüşmeyi kapatsın
+   - İzin verilmedi (kamera/mikrofon) → açıklayıcı ekran, ayarlara yönlendirme
+
+### Kabul kriterleri
+- [ ] İki gerçek cihaz arasında uçtan uca görüntülü görüşme çalışıyor
+- [ ] Sayaç ekranda doğru ilerliyor ve **sunucudaki kesintiyle uyuşuyor**
+- [ ] Jeton bitince görüşme kapanıyor, kullanıcı ne olduğunu anlıyor
+- [ ] Görüşme sırasında jeton yüklenebiliyor ve görüşme kesilmiyor
+- [ ] İnternet koptuğunda uygulama çökmüyor, durum net
+- [ ] Kamera/mikrofon izinleri düzgün isteniyor
+
+---
+
+## AŞAMA 16 — Mobil cüzdan ve uzman modu
+
+**Ön koşul:** Aşama 15, Aşama 5
+**Süre:** 5 gün
+
+### Amaç
+Para tarafını ve uzman deneyimini tamamlamak.
+
+### Yapılacaklar
+**Müşteri tarafı:**
+1. Cüzdan ekranı: bakiye (jeton + "yaklaşık X dakika"), hareket geçmişi
+2. Jeton satın alma: paket listesi, ödeme sayfası (WebView ya da SDK),
+   ödeme sonrası **bakiyenin anında güncellenmesi**
+3. Görüşme geçmişi: tarih, uzman, süre, harcanan jeton
+
+**Uzman tarafı:**
+4. Müsaitlik anahtarı — büyük, net, ana ekranda. Açıkken kalp atışı çalışır.
+5. Kazanç ekranı: bugün / bu ay / toplam, görüşme bazlı döküm
+6. Görüşme geçmişi
+7. **Uzmana özel uyarılar:** "pil optimizasyonunu kapat", "bildirim izni ver" —
+   müsaitlik açıkken bunlar eksikse uyar (**çağrı kaçırmanın bir numaralı sebebi budur**)
+
+**Ortak:**
+8. Profil düzenleme, çıkış yapma, hesap silme (mağaza şartı), gizlilik ve kullanım koşulları
+
+### Kabul kriterleri
+- [ ] Gerçek (test) kartla jeton alınıyor, bakiye anında güncelleniyor
+- [ ] Uzman müsaitliği açıp kapatabiliyor, listede anında yansıyor
+- [ ] Kazanç ekranı sunucudaki hakedişle birebir uyuşuyor
+- [ ] Hesap silme çalışıyor
+
+---
+
+## AŞAMA 17 — Uçtan uca test ve yayına alma
+
+**Ön koşul:** Aşama 16
+**Süre:** 5 gün
+
+### Amaç
+Ürünü gerçekten yayına çıkarmak.
+
+### Yapılacaklar
+1. **Uçtan uca senaryo testleri** (gerçek cihazlarla, elle):
+   - Yeni kullanıcı → kayıt → jeton al → uzman ara → 5 dk konuş → bakiye kontrolü
+   - Jeton bitene kadar konuş → otomatik kapanma
+   - Uzman cevaplamıyor → zincir → ikinci uzman
+   - Görüşme ortasında internet kes → davranış
+   - Aynı anda 5 görüşme → sistem stabil mi
+2. **Yük testi:** 20 eşzamanlı görüşme simülasyonu. CPU, bellek, veritabanı bağlantısı izle.
+3. **Sunucu kurulumu:**
+   - Ubuntu sunucu, Docker Compose ile dağıtım
+   - Nginx ters vekil + Let's Encrypt SSL
+   - Postgres otomatik günlük yedek (sunucu dışına da kopya)
+   - systemd / Docker restart politikaları
+   - Log rotasyonu
+   - Temel izleme + alarm
+4. **Mağaza hazırlığı:**
+   - Uygulama ikonu, açılış ekranı, mağaza görselleri
+   - Gizlilik politikası ve kullanım koşulları (**URL'leri canlı olmalı**)
+   - Gizlilik beyanı formları (Apple: Privacy Nutrition Labels, Google: Data Safety)
+   - Kamera/mikrofon izin açıklama metinleri (Apple bunları okur, eksikse reddeder)
+   - **Test hesabı** — inceleme ekibine ver, içinde jeton dolu olsun ve bir uzman
+     her zaman müsait olsun (yoksa "çalışmıyor" deyip reddederler)
+   - Yaş sınırı ve içerik derecelendirmesi
+5. **Yayın öncesi kontrol listesi:**
+   - [ ] Tüm gizli anahtarlar üretim değerleriyle, kod deposunda değil
+   - [ ] iyzico **canlı** ortama geçildi ve gerçek kartla 1 TL test yapıldı
+   - [ ] LiveKit üretim projesi ve kotaları ayarlı
+   - [ ] Hata bildirimleri çalışıyor
+   - [ ] Yedek alındı ve **geri yüklemesi denendi**
+   - [ ] Kullanım koşulları / gizlilik politikası hukukçu onayından geçti
+6. **Kapalı beta:** 10-20 gerçek kullanıcı, 1 hafta. Sonra yayın.
+
+### Kabul kriterleri
+- [ ] Uygulama iki mağazada da yayında
+- [ ] Gerçek para ile gerçek görüşme yapıldı ve doğru ücretlendirildi
+- [ ] Sunucu yeniden başlatıldığında sistem kendi kendine ayağa kalkıyor
+- [ ] Hata alarmı test edildi ve ulaştı
+
+---
+
+# 📎 EK — Claude'a nasıl vereceksin
+
+## Her yeni oturumda kullanacağın şablon
+
+```
+Bir jetonlu görüntülü görüşme platformu geliştiriyorum.
+
+[Buraya bu dokümanın "SABİT BAĞLAM" bölümünün tamamını yapıştır]
+
+Şu ana kadar Aşama 1..N-1 tamamlandı. Proje kök dizini: <yol>
+Önce projedeki CLAUDE.md dosyasını oku.
+
+Şimdi şu aşamayı yap:
+
+[Buraya sadece sıradaki AŞAMA bölümünü yapıştır]
+
+Kurallar:
+- Değişmez kurallara uy, hiçbirini esnetme
+- Önce ne yapacağını özetle, onay isteme, sonra yaz
+- Aşama sonunda kabul kriterlerini tek tek doğrula ve sonucu raporla
+- Kabul kriterlerini karşılamayan bir şey varsa açıkça söyle, gizleme
+- Bu aşamanın dışına çıkma, sonraki aşamaların işini yapma
+```
+
+## Aşama bittikten sonra
+1. Kabul kriterlerini **kendin de** doğrula (sadece Claude'un raporuna güvenme)
+2. `git commit` at — her aşama bir commit
+3. Bu dokümanda aşamayı ✅ işaretle
+4. Bir aksaklık/karar çıktıysa `docs/decisions/` altına not düş
+
+## Genel tavsiyeler
+- **Aşamaları atlama.** Sıra bilinçli — her aşama öncekinin üstüne kuruluyor.
+- **Bir oturumda bir aşama.** İkisini birden vermeye kalkma, kalite düşer.
+- Aşama uzun gelirse "Yapılacaklar" listesini ikiye böl, ama **kabul kriterlerini bölme**.
+- Claude bir kural ihlali yaptıysa (örn. bakiyeyi kolonda tutmaya kalktı) hemen
+  **DEĞİŞMEZ KURALLAR**'ı hatırlat ve düzelttir.
+- Aşama 10 ve 15'te **gerçek cihaz şart**. Emülatörde "çalışıyor" demek yanıltıcıdır.
+
+---
+
+# 📅 TOPLAM SÜRE
+
+| Grup | Aşama | Süre |
+|---|---|---|
+| Temel | 1-3 | 8 gün |
+| Para | 4-5 | 8 gün |
+| Görüşme (backend) | 6-10 | 23 gün |
+| Yönetim | 11-13 | 13 gün |
+| Mobil | 14-16 | 17 gün |
+| Yayın | 17 | 5 gün |
+| **TOPLAM** | | **~74 iş günü ≈ 3.5 ay** |
+
+Backend tek başına: ~52 iş günü (~2.5 ay).
+Mobil ayrı bir kişiye paralel verilirse toplam **~2.5 aya** iner.
+
+---
+
+# ✅ İLERLEME TAKİBİ
+
+- [ ] Aşama 1 — Solution iskeleti ve altyapı
+- [ ] Aşama 2 — Veri modeli ve migration'lar
+- [ ] Aşama 3 — Kimlik ve kullanıcı yönetimi
+- [ ] Aşama 4 — Cüzdan defteri
+- [ ] Aşama 5 — Ödeme entegrasyonu
+- [ ] Aşama 6 — Müsaitlik (Presence)
+- [ ] Aşama 7 — Eşleştirme ve arama zinciri
+- [ ] Aşama 8 — Görüşme yaşam döngüsü + video
+- [ ] Aşama 9 — Sayaç ve ücretlendirme
+- [ ] Aşama 10 — Push bildirim ve çağrı uyandırma
+- [ ] Aşama 11 — Hakediş ve raporlar
+- [ ] Aşama 12 — Admin paneli
+- [ ] Aşama 13 — Sertleştirme ve güvenlik
+- [ ] Aşama 14 — Mobil iskelet ve giriş
+- [ ] Aşama 15 — Mobil görüşme akışı
+- [ ] Aşama 16 — Mobil cüzdan ve uzman modu
+- [ ] Aşama 17 — Uçtan uca test ve yayına alma
+
+---
+
+*Hazırlayan: Claude (Kral Faruk) · Tarih: 16.09.2026 · Sürüm: 1.0*

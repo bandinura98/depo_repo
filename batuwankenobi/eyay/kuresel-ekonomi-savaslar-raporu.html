@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Küresel Ekonomi ve Savaşlar — Durum Raporu</title>
+<style>
+  :root{
+    --bg:#faf9f7;
+    --paper:#ffffff;
+    --ink:#1c1b19;
+    --ink-soft:#514d47;
+    --line:#e6e2da;
+    --accent:#8a3324;
+    --accent-soft:#f4e6e1;
+    --econ:#1f5c4a;
+    --econ-soft:#e4efe9;
+    --ukr:#20518c;
+    --ukr-soft:#e4ecf6;
+    --iran:#7a5a1e;
+    --iran-soft:#f4ecda;
+    --warn:#a8471f;
+    --serif: Georgia, 'Times New Roman', 'Noto Serif', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.6;
+    padding:0 16px;
+  }
+  .wrap{
+    max-width:840px;
+    margin:0 auto;
+    padding:48px 0 80px;
+  }
+  header.title{
+    border-bottom:3px solid var(--ink);
+    padding-bottom:22px;
+    margin-bottom:8px;
+  }
+  .kicker{
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:700;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-size:clamp(28px,5vw,40px);
+    line-height:1.15;
+    margin:0 0 12px;
+    font-weight:700;
+  }
+  .subtitle{
+    color:var(--ink-soft);
+    font-size:16px;
+    max-width:60ch;
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 22px;
+    margin-top:18px;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+  .meta-row strong{color:var(--ink);}
+
+  .disclaimer{
+    margin:28px 0 40px;
+    padding:16px 18px;
+    background:var(--accent-soft);
+    border:1px solid #e4c9c1;
+    border-radius:10px;
+    font-size:14.5px;
+    color:#5c2418;
+  }
+  .disclaimer strong{display:block; margin-bottom:4px; color:var(--accent);}
+
+  section{margin-bottom:48px;}
+  section > h2{
+    font-family:var(--serif);
+    font-size:23px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:0 0 18px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .dot{
+    width:11px;height:11px;border-radius:50%;flex:none;
+  }
+  .dot.econ{background:var(--econ);}
+  .dot.ukr{background:var(--ukr);}
+  .dot.iran{background:var(--iran);}
+
+  p{margin:0 0 14px;}
+  .lead{font-size:16px;}
+
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:12px;
+    margin:18px 0 22px;
+  }
+  .stat{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .stat .num{
+    font-family:var(--serif);
+    font-size:24px;
+    font-weight:700;
+    line-height:1.1;
+  }
+  .stat .label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  section.econ .stat .num{color:var(--econ);}
+  section.ukr .stat .num{color:var(--ukr);}
+  section.iran .stat .num{color:var(--iran);}
+
+  .callout{
+    border-radius:10px;
+    padding:16px 18px;
+    margin:20px 0;
+    font-size:14.5px;
+    border:1px solid var(--line);
+  }
+  section.econ .callout{background:var(--econ-soft); border-color:#c9e0d5;}
+  section.ukr .callout{background:var(--ukr-soft); border-color:#c7d8ee;}
+  section.iran .callout{background:var(--iran-soft); border-color:#e5d5a8;}
+  .callout .callout-label{
+    font-weight:700;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-bottom:6px;
+    display:block;
+  }
+  section.econ .callout .callout-label{color:var(--econ);}
+  section.ukr .callout .callout-label{color:var(--ukr);}
+  section.iran .callout .callout-label{color:var(--iran);}
+
+  .estimate-box{
+    margin-top:22px;
+    background:var(--paper);
+    border:1.5px dashed var(--ink-soft);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .estimate-box .callout-label{
+    font-weight:700;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink);
+    margin-bottom:8px;
+    display:block;
+  }
+  .scenario{
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+    padding:9px 0;
+    border-top:1px solid var(--line);
+    font-size:14px;
+  }
+  .scenario:first-of-type{border-top:none;}
+  .scenario .s-name{color:var(--ink); max-width:60%;}
+  .scenario .s-window{
+    color:var(--ink-soft);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+    font-weight:600;
+  }
+
+  ul.plain{margin:0 0 14px; padding-left:20px;}
+  ul.plain li{margin-bottom:6px;}
+
+  footer{
+    margin-top:60px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  footer h3{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--ink);
+    margin:0 0 10px;
+  }
+  footer ol{padding-left:18px; margin:0 0 18px;}
+  footer ol li{margin-bottom:5px;}
+  footer a{color:var(--ink-soft);}
+  footer .final-note{font-style:italic;}
+
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#17140f;
+      --paper:#211d17;
+      --ink:#f1ece2;
+      --ink-soft:#b8afa1;
+      --line:#3a352c;
+      --accent:#e08b6f;
+      --accent-soft:#3a231c;
+      --econ:#7fd1b3;
+      --econ-soft:#1c2f27;
+      --ukr:#8bb4e8;
+      --ukr-soft:#1c2735;
+      --iran:#e0c26b;
+      --iran-soft:#332a15;
+    }
+    .disclaimer{color:#f0d7cd; border-color:#5c2418;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="title">
+    <div class="kicker">Durum Raporu · Rasyonel Değerlendirme</div>
+    <h1>Küresel Ekonomi, Ukrayna Savaşı ve İran-ABD Gerginliği</h1>
+    <p class="subtitle">Mevcut haber akışından derlenen olgular ve bunlara dayanan temkinli bir bitiş-zamanlaması tahmini.</p>
+    <div class="meta-row">
+      <span><strong>Tarih:</strong> 11 Eylül 2026</span>
+      <span><strong>Kapsam:</strong> Küresel ekonomi · Rusya–Ukrayna savaşı · İran–ABD gerginliği</span>
+      <span><strong>Hazırlayan:</strong> Claude (Cowork)</span>
+    </div>
+  </header>
+
+  <div class="disclaimer">
+    <strong>Veri sınırlaması hakkında not</strong>
+    Bu rapor, bu oturumda canlı web arama aracının çalışmamasından ötürü Bing haber sayfaları, Wikipedia ve IMF Blog üzerinden tek tek çekilen (WebFetch) manşetlere dayanıyor. Eğitim verisi kesim tarihim Ocak 2026; İran cephesindeki bazı gelişmeler bu tarihten sonra oluştuğu için yalnızca manşet düzeyinde biliniyor, ayrıntılı doğrulanmış değil. Bitiş tahminleri kesin öngörü değil, mevcut sinyallere dayalı olasılıksal bir okumadır — güncel haber akışıyla teyit edilmelidir.
+  </div>
+
+  <section class="econ">
+    <h2><span class="dot econ"></span>Küresel Ekonomi</h2>
+    <p class="lead">IMF'nin Eylül 2026 açıklamalarına göre büyüme hız kesmeden sürüyor, ama risk vurgusu her raporda tekrarlanıyor.</p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="num">~%3</div><div class="label">IMF 2026 küresel büyüme tahmini</div></div>
+      <div class="stat"><div class="num">6 ay</div><div class="label">ABD–İran savaşının süresi (IMF'nin ifadesiyle)</div></div>
+      <div class="stat"><div class="num">Yüksek</div><div class="label">IMF'nin belirttiği belirsizlik seviyesi</div></div>
+    </div>
+
+    <p>Riskler somut ve tekrarlanan üç başlıkta toplanıyor: borç yükü, enerji şoku ihtimali ve küresel dengesizlikler. Fitch birkaç ay önce doğrudan Ortadoğu etkisini gerekçe göstererek büyüme tahminini aşağı çekmişti. Buna karşın finansal piyasalar (South China Morning Post'un tabiriyle) "kıyamet senaryocularını şaşırtacak kadar dirençli" — yani reel ekonomideki kırılganlık ile piyasa risk iştahı arasında bir ayrışma var.</p>
+
+    <div class="callout">
+      <span class="callout-label">Okuma</span>
+      Jeopolitik risk primi büyürken piyasanın buna henüz tam fiyat vermemesi tipik bir "gecikmeli tepki" durumu. Bu tür ayrışmalar genelde ya beklenmedik bir tırmanma ya da beklenmedik bir çözülme ile aniden kapanır — ortada uzun süre kalmaz.
+    </div>
+  </section>
+
+  <section class="ukr">
+    <h2><span class="dot ukr"></span>Rusya–Ukrayna Savaşı</h2>
+    <p class="lead">Savaş 1.661. gününde (~4,5 yıl). Karışık sinyaller: bir yanda yapısal yorgunluk, diğer yanda açık tırmanma riski.</p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="num">~4,5 yıl</div><div class="label">Şubat 2022'den bu yana geçen süre</div></div>
+      <div class="stat"><div class="num">2.800 km+</div><div class="label">Ukrayna'nın Sibirya'ya en derin vuruşu</div></div>
+      <div class="stat"><div class="num">8 yıl</div><div class="label">2014–2022 Donbas donuk çatışmasının süresi (emsal)</div></div>
+    </div>
+
+    <p><strong>Rusya cephesi:</strong> Batılı yetkililer 2026 ortasından itibaren Rusya'nın kaybettiği asker sayısının yeni asker kazanımının üzerine çıktığını — yani sürdürülemez bir yıpranma oranına girildiğini bildiriyor. Bunu telafi etmek için yabancı uyruklu asker devşiriliyor.</p>
+    <p><strong>Ukrayna cephesi:</strong> Rus enerji/yakıt altyapısına yönelik sistematik saldırılar sürüyor ve Rusya'da iç yakıt krizine yol açmış durumda; Sibirya'ya kadar uzanan derin vuruşlar devam ediyor.</p>
+    <p><strong>Diplomasi:</strong> Kremlin, ABD–Ukrayna ile müzakerelerin yeniden başlamasını "dışlamıyor" diyor — kapı tamamen kapalı değil. Trump yönetiminin yeni bir barış girişimi var, ama haberler bunun sahadaki olaylarla (örn. NATO'nun engellediği bir Rus sabotaj planı) baltalandığını yazıyor.</p>
+
+    <div class="estimate-box">
+      <span class="callout-label">Rasyonel Zamanlama Tahmini</span>
+      <div class="scenario">
+        <span class="s-name">Kısmi / donuk ateşkes (Kore Savaşı modeli — cepheler donar, savaş teknik olarak bitmez)</span>
+        <span class="s-window">2027–2028, en olası senaryo</span>
+      </div>
+      <div class="scenario">
+        <span class="s-name">Tam barış antlaşması (sınırlar, tazminat, güvenlik garantileri)</span>
+        <span class="s-window">Muhtemelen yıllar sürer</span>
+      </div>
+      <div class="scenario">
+        <span class="s-name">Bölgesel tırmanma / yayılma riski</span>
+        <span class="s-window">Düşük ama sıfır değil</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="iran">
+    <h2><span class="dot iran"></span>İran–ABD Gerginliği</h2>
+    <p class="lead">Haziran 2025'teki 12 günlük İsrail–İran savaşından farklı, daha geniş ve uzun soluklu yeni bir cephe: bir "ABD–İran savaşı".</p>
+
+    <div class="stat-row">
+      <div class="stat"><div class="num">Haz. 2025</div><div class="label">12 günlük İsrail–İran savaşı, ABD'nin katılımıyla, ateşkesle bitti</div></div>
+      <div class="stat"><div class="num">~Mart 2026</div><div class="label">Yeni ABD–İran cephesinin başladığı tahmini tarih</div></div>
+      <div class="stat"><div class="num">6 ay</div><div class="label">Bu yeni cephenin Eylül 2026 itibarıyla süresi</div></div>
+    </div>
+
+    <p>Mevcut manşetler ağırlıklı olarak askeri değil <strong>ekonomik savaş</strong> hattını gösteriyor: ABD yeni yaptırımları "ekonomik D-Day" olarak nitelendiriyor, İran bunu "savaş nedeni" sayıyor. Aynı anda diplomatik bir kanal da açık görünüyor: bir Mutabakat Muhtırası (MOU) tartışılıyor ve İran Cumhurbaşkanı bunu "en iyi yol" olarak savunuyor; Pakistan ordu komutanının Tahran ziyareti üçüncü taraf arabuluculuğuna işaret ediyor; Çin bölgesel yatışma çağrısı yapıyor; İran "İslami NATO" gibi bir bloğa davet edilmiş durumda.</p>
+
+    <div class="callout">
+      <span class="callout-label">Not</span>
+      Bu cephenin ayrıntıları eğitim verimin kesim tarihinden (Ocak 2026) sonra gelişti, bu yüzden yalnızca manşet düzeyinde biliniyor. Aşağıdaki tahmin, doğrulanmamış sinyallere dayanıyor.
+    </div>
+
+    <div class="estimate-box">
+      <span class="callout-label">Rasyonel Zamanlama Tahmini</span>
+      <div class="scenario">
+        <span class="s-name">MOU / arabuluculuk hattının ilerlemesiyle kısmi yatışma (yaptırım gevşetme karşılığı çerçeve anlaşma)</span>
+        <span class="s-window">2026 sonu – 2027 ortası</span>
+      </div>
+      <div class="scenario">
+        <span class="s-name">Uzun süreli yaptırım/ekonomik savaş hattının sürmesi (rejim hayatta kalma mantığıyla dayanma kapasitesi yüksek)</span>
+        <span class="s-window">Yıllar sürebilir</span>
+      </div>
+      <div class="scenario">
+        <span class="s-name">Askeri tırmanma riski (sert söylemler sürüyor)</span>
+        <span class="s-window">Canlı, öngörülemez</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <h3>Kaynaklar</h3>
+    <ol>
+      <li>Bing News — "Ukraine war latest news" (haber başlıkları derlemesi), 11 Eylül 2026 erişim.</li>
+      <li>Bing News — "Iran Israel conflict latest news" (haber başlıkları derlemesi), 11 Eylül 2026 erişim.</li>
+      <li>Bing News — "global economy outlook news" (haber başlıkları derlemesi), 11 Eylül 2026 erişim.</li>
+      <li>Wikipedia — "Russian invasion of Ukraine" (en.wikipedia.org).</li>
+      <li>Wikipedia — "Iran–Israel war" (en.wikipedia.org).</li>
+      <li>IMF Blogs (imf.org/en/Blogs).</li>
+    </ol>
+    <p class="final-note">Bu rapor otomatik olarak derlenmiş bir durum değerlendirmesidir; kesin öngörü niteliği taşımaz. Güncel gelişmeler için birincil haber kaynaklarını kontrol edin.</p>
+  </footer>
+
+</div>
+</body>
+</html>
